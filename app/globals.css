@@ -1,26 +1,57 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --sata-blue: #127bc0;
+  --sata-blue-deep: #0a3d66;
+  --sata-ink: #0b1f33;
+  --sata-red: #e8141b;
+  --sata-mist: #f3f8fc;
+  --sata-line: #dbe7f1;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-blue: var(--sata-blue);
+  --color-deep: var(--sata-blue-deep);
+  --color-ink: var(--sata-ink);
+  --color-vigil: var(--sata-red);
+  --color-mist: var(--sata-mist);
+  --color-line: var(--sata-line);
+  --color-muted: #5b7185;
+  --font-sans: var(--font-body);
+  --font-display: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { scroll-behavior: smooth; }
+/* Never let a wide element add a horizontal scrollbar, which would cover the bottom of the page. `clip` keeps the sticky header working. */
+html, body { overflow-x: clip; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--sata-ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+h1, h2, h3, .font-display { font-family: var(--font-body), system-ui, sans-serif; letter-spacing: -0.015em; }
+
+.card-3d { transform-style: preserve-3d; transition: transform .15s ease-out; will-change: transform; }
+.glass { background: rgba(255,255,255,.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.dot-grid { background-image: radial-gradient(rgba(18,123,192,.18) 1px, transparent 1px); background-size: 22px 22px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes hero-zoom { from { transform: scale(1); } to { transform: scale(1.09); } }
+.hero-zoom { animation: hero-zoom 9s ease-out both; }
+@keyframes hero-progress { from { width: 0; } to { width: 100%; } }
+.hero-progress { animation: hero-progress 7.5s linear both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; }
+  .hero-zoom, .hero-progress { animation: none; }
+  .hero-progress { width: 100%; }
+  html { scroll-behavior: auto; }
+}
+
+.dot-grid-dark { background-image: radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px); background-size: 24px 24px; }
+.hero-fade { background: linear-gradient(90deg, rgba(6,35,61,.96) 0%, rgba(6,35,61,.88) 38%, rgba(8,45,78,.72) 70%, rgba(8,45,78,.62) 100%); }
+@media (max-width: 1023px) { .hero-fade { background: linear-gradient(180deg, rgba(6,35,61,.92) 0%, rgba(6,35,61,.85) 60%, rgba(6,35,61,.95) 100%); } }
