@@ -248,3 +248,45 @@ export interface CalEntry {
 }
 
 export const BANNER_PAGES = ["about", "leadership", "membership", "events", "calendar", "news", "resources", "gallery", "contact"] as const;
+
+/** An anaesthesia news item collected automatically from outside sources (lib/news-feed.ts). */
+export interface FeedItem {
+  id: string;
+  title: string;
+  summary: string;
+  url: string;
+  image?: string | null;
+  source: string;
+  region: "tanzania" | "africa" | "world";
+  category: "conference" | "research" | "case" | "safety" | "news";
+  score: number;
+  publishedAt: string;
+  fetchedAt: string;
+}
+
+export type NewsletterKind = "announcement" | "event" | "conference" | "research" | "case" | "safety" | "news" | "custom";
+
+/** One story in the weekly newsletter. */
+export interface NewsletterItem {
+  title: string;
+  summary: string;
+  url: string;
+  image?: string;
+  source: string;
+  kind: NewsletterKind;
+  pinned?: boolean;
+}
+
+/** A weekly "10 key things" newsletter issue, drafted automatically and sent by the secretariat. */
+export interface Newsletter {
+  id: string;
+  weekOf: string; // ISO date of the Monday
+  subject: string;
+  intro: string;
+  items: NewsletterItem[];
+  status: "draft" | "sent";
+  createdAt: string;
+  sentAt?: string;
+  sentCount: number;
+  createdBy: string;
+}

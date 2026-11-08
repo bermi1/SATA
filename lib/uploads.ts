@@ -8,7 +8,7 @@ import { supabaseAdmin } from "./db/supabase";
 // Local development: .data/uploads on disk.
 const BUCKET = "uploads";
 const LOCAL_DIR = path.join(/*turbopackIgnore: true*/ process.cwd(), ".data", "uploads");
-const MAX_IMAGE = 5 * 1024 * 1024;
+const MAX_IMAGE = 4 * 1024 * 1024; // Vercel caps request bodies at 4.5 MB; stored WebP files are far smaller
 const MAX_PDF = 20 * 1024 * 1024;
 
 export const MIME: Record<string, string> = { png: "image/png", jpg: "image/jpeg", webp: "image/webp", pdf: "application/pdf" };
@@ -41,12 +41,22 @@ export async function readUpload(name: string): Promise<Buffer | null> {
   return fs.existsSync(/*turbopackIgnore: true*/ file) ? fs.readFileSync(/*turbopackIgnore: true*/ file) : null;
 }
 
-/** Validates by file signature (not the client-claimed type) and stores the image. Returns its public URL. */
+/** Every uploaded photo is turned into a compact WebP (max 1920px, EXIF stripped) to save Supabase storage. */
+async function toWebp(buf: Buffer): Promise<Buffer | null> {
+  try {
+    const sharp = (await import("sharp")).default;
+    return await sharp(buf, { failOn: "error" }).rotate().resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true }).webp({ quality: 78, effort: 4 }).toBuffer();
+  } catch { return null; }
+}
+
+/** Validates by file signature (not the client-claimed type), converts to WebP and stores the image. Returns its public URL. */
 export async function savePoster(file: File): Promise<{ url: string } | { error: string }> {
-  if (file.size > MAX_IMAGE) return { error: "Image must be 5 MB or smaller" };
+  if (file.size > MAX_IMAGE) return { error: "Image must be 4 MB or smaller" };
   const buf = Buffer.from(await file.arrayBuffer());
   const ext = sniff(buf);
   if (!ext) return { error: "Image must be a PNG, JPG or WebP file" };
+  const webp = await toWebp(buf);
+  if (webp && (ext !== "webp" || webp.length < buf.length)) return put(`${randomUUID()}.webp`, webp, "webp");
   return put(`${randomUUID()}.${ext}`, buf, ext);
 }
 

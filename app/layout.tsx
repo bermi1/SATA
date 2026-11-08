@@ -6,7 +6,7 @@ const body = IBM_Plex_Sans({ variable: "--font-body", subsets: ["latin"], weight
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://sata.co.tz"),
-  openGraph: { type: "website", siteName: "SATA", locale: "en_TZ", images: ["/images/events/mbeya-2026.jpg"] },
+  openGraph: { type: "website", siteName: "SATA — Society of Anaesthesiologists of Tanzania", locale: "en_TZ" },
   twitter: { card: "summary_large_image" },
   title: { default: "SATA — Society of Anaesthesiologists of Tanzania", template: "%s · SATA" },
   description:

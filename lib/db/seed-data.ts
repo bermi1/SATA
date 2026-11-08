@@ -97,5 +97,7 @@ export function buildSeedTables(mode: "demo" | "production"): Rows {
     calendar: CALENDAR_SEED.map((c) => ({ ...c })),
     settings: [{ id: "site", ...structuredClone(SETTINGS_SEED) }],
     login_codes: [],
+    news_feed: [],
+    newsletters: [],
   };
 }

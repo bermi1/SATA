@@ -8,10 +8,13 @@ import { excerpt } from "@/components/RichText";
 import { Badge, fmtDate } from "@/components/ui";
 import { getSession } from "@/lib/auth";
 import { listAnnouncements } from "@/lib/store";
+import { NewsFeed } from "@/components/NewsFeed";
+
 
 export const metadata: Metadata = { title: "News", description: "News, conference reports and announcements from the Society of Anaesthesiologists of Tanzania." };
 
-export default async function News() {
+export default async function News({ searchParams }: { searchParams: Promise<{ feed?: string; region?: string }> }) {
+  const sp = await searchParams;
   const me = await getSession();
   const items = await listAnnouncements(me ? "member" : "public");
   const [lead, ...rest] = items;
@@ -37,7 +40,7 @@ export default async function News() {
         )}
 
         <section>
-          <Reveal><SectionHead eyebrow="Archive" title="More from SATA." /></Reveal>
+          <Reveal><SectionHead eyebrow="From SATA" title="More from the Society." /></Reveal>
           <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {rest.map((n, i) => (
               <Reveal key={n.id} delay={i * 60}>
@@ -53,6 +56,8 @@ export default async function News() {
             ))}
           </div>
         </section>
+
+        <NewsFeed tab={sp.feed} region={sp.region} />
       </div>
     </>
   );

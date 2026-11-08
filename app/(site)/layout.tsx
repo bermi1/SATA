@@ -1,3 +1,4 @@
+import { AskSata } from "@/components/AskSata";
 import { SiteFooter, SiteNav } from "@/components/SiteChrome";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -7,6 +8,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <SiteNav />
       <main id="main-content" className="flex-1">{children}</main>
       <SiteFooter />
+      <AskSata />
     </>
   );
 }

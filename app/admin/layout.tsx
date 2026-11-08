@@ -16,6 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/calendar", label: "Calendar", area: "events" },
     { href: "/admin/messaging", label: "Bulk SMS & email", area: "messaging", badge: overdue },
     { href: "/admin/subscribers", label: "Subscribers", area: "subscribers" },
+    { href: "/admin/newsletter", label: "Weekly newsletter", area: "announcements" },
     { href: "/admin/payments", label: "Payments", area: "payments", badge: unmatched },
     { href: "/admin/departments", label: "Leadership & departments", area: "departments" },
     { href: "/admin/comms", label: "Communications & help desk", area: "announcements", badge: tickets },
