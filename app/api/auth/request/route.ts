@@ -23,7 +23,12 @@ export async function POST(req: Request) {
   let devCode: string | undefined;
   if (m && m.status !== "suspended") {
     const code = await issueCode(email);
-    const sent = await sendEmail(email, "Your SATA sign-in code", `Your SATA sign-in code is ${code}.\n\nIt expires in 10 minutes. If you did not ask for it, you can ignore this email.`);
+    const sent = await sendEmail(
+      email,
+      `${code} is your SATA sign-in code`,
+      `Use the code below to sign in to your SATA account. It expires in 10 minutes.\n\nIf you did not ask for this code, you can safely ignore this email. Nobody can sign in without it.`,
+      { heading: "Your sign-in code", code, preheader: `Your SATA sign-in code is ${code}. It expires in 10 minutes.` },
+    );
     if (!sent.ok) return Response.json({ error: "We could not send the email. Please try again shortly." }, { status: 502 });
     if (!prod && emailProvider() === "demo") devCode = code; // local development only: there is no email provider to deliver it
   }

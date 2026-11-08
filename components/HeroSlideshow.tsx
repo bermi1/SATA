@@ -51,7 +51,7 @@ export default function HeroSlideshow({ slides }: { slides: Slide[] }) {
         </div>
 
         {/* Message */}
-        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-5 pb-6 pt-14 sm:pt-20">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-5 pb-4 pt-24 sm:pb-6 sm:pt-32">
           <div key={i} className="rise max-w-2xl" aria-live="polite">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-sky-200 backdrop-blur-md">
               <span className="size-1.5 rounded-full bg-sky-300" />

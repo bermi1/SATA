@@ -5,6 +5,8 @@
 //   SMS_PROVIDER=beem            BEEM_API_KEY=...  BEEM_SECRET=...  BEEM_SENDER_ID=SATA
 //   RESEND_API_KEY=...  EMAIL_FROM="SATA <info@sata.co.tz>"
 
+import { renderEmail, type EmailOptions } from "./email-template";
+
 export interface SendResult { to: string; ok: boolean; error?: string }
 
 /** Normalise Tanzanian numbers to +255XXXXXXXXX. Returns null when it cannot be a valid number. */
@@ -75,13 +77,13 @@ export async function sendSms(to: string[], message: string): Promise<SendResult
   return numbers.map((n) => ({ to: n, ok: true })); // demo
 }
 
-export async function sendEmail(to: string, subject: string, text: string): Promise<SendResult> {
+export async function sendEmail(to: string, subject: string, text: string, opts: EmailOptions = {}): Promise<SendResult> {
   if (!process.env.RESEND_API_KEY) return { to, ok: true }; // demo
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: process.env.EMAIL_FROM ?? "SATA <info@sata.co.tz>", to, subject, text }),
+      body: JSON.stringify({ from: process.env.EMAIL_FROM ?? "SATA <info@sata.co.tz>", to, subject, text, html: renderEmail(subject, text, opts), reply_to: process.env.EMAIL_REPLY_TO ?? "info@sata.co.tz" }),
     });
     return { to, ok: res.ok, error: res.ok ? undefined : `HTTP ${res.status}` };
   } catch (e) {
