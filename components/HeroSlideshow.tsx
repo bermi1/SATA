@@ -17,7 +17,7 @@ const FOCUS: Record<string, string> = {
 const focusOf = (src: string) => Object.entries(FOCUS).find(([k]) => src.includes(k))?.[1] ?? "50% 40%";
 
 const SLIDE_MS = 7500;
-const STATS: [string, string][] = [["≈200", "delegates at the 10th conference"], ["12", "exhibitors, Mbeya 2026"], ["3", "WFSA · CANECSA · MAT"], ["2002", "registered under NGOs Act No. 24"]];
+const STATS: [string, string][] = [["200+", "Conference delegates"], ["12", "Exhibitors, Mbeya 2026"], ["3", "Global partners"], ["2002", "Year registered"]];
 
 // Full-bleed photograph with a transparent gradient and glass controls laid over it.
 // Slow zoom, crossfade, timed progress; pauses on interaction and respects reduced motion.
@@ -57,8 +57,8 @@ export default function HeroSlideshow({ slides }: { slides: Slide[] }) {
               <span className="size-1.5 rounded-full bg-sky-300" />
               {String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
             </span>
-            <h1 className="mt-5 text-balance text-[2.5rem] font-extrabold leading-[1.05] tracking-tight drop-shadow-sm sm:text-6xl lg:text-7xl">{s.caption}</h1>
-            {s.text && <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{s.text}</p>}
+            <h1 className="mt-4 text-balance text-[1.75rem] font-extrabold leading-[1.1] tracking-tight drop-shadow-sm sm:text-4xl lg:text-5xl">{s.caption}</h1>
+            {s.text && <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/80 sm:text-base">{s.text}</p>}
             <div className="mt-8 flex flex-wrap gap-3">
               {s.href && (
                 <Link href={s.href} className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-bold text-deep shadow-xl shadow-black/20 transition hover:bg-sky-100">
@@ -94,8 +94,8 @@ export default function HeroSlideshow({ slides }: { slides: Slide[] }) {
           <dl className="mt-5 grid grid-cols-2 overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-2xl shadow-black/20 backdrop-blur-xl sm:grid-cols-4">
             {STATS.map(([a, b], idx) => (
               <div key={b} className={`px-5 py-4 ${idx > 0 ? "sm:border-l sm:border-white/15" : ""} ${idx % 2 === 1 ? "border-l border-white/15 sm:border-l" : ""} ${idx > 1 ? "border-t border-white/15 sm:border-t-0" : ""}`}>
-                <dt className="text-2xl font-extrabold tracking-tight">{a}</dt>
-                <dd className="mt-0.5 text-[11px] leading-tight text-white/70 sm:text-xs">{b}</dd>
+                <dt className="text-xl font-bold leading-none tracking-tight tabular-nums sm:text-2xl">{a}</dt>
+                <dd className="mt-2 text-[10px] font-medium uppercase leading-tight tracking-[0.12em] text-white/65 sm:text-[11px]">{b}</dd>
               </div>
             ))}
           </dl>
