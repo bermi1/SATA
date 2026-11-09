@@ -12,19 +12,19 @@ type Act = { href: string; label: string; icon: Icon };
 
 function Kpi({ icon: Icon, label, value, hint, href, tone }: { icon: Icon; label: string; value: React.ReactNode; hint?: string; href?: string; tone?: Tone }) {
   const body = (
-    <div className="group h-full rounded-2xl border border-line bg-white p-4 transition hover:border-blue hover:shadow-lg hover:shadow-blue/10 sm:p-5">
+    <div className="group h-full rounded-2xl border border-line/80 bg-white p-4 shadow-[0_1px_2px_rgba(11,31,51,.04)] transition hover:-translate-y-0.5 hover:border-blue/40 hover:shadow-lg hover:shadow-blue/5 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-bold uppercase tracking-wider text-muted">{label}</span>
         <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${tone === "red" ? "bg-vigil/10 text-vigil" : tone === "green" ? "bg-emerald-100 text-emerald-700" : "bg-blue/10 text-blue"}`}><Icon className="size-[18px]" /></span>
       </div>
-      <div className="mt-3 break-words font-display text-2xl font-extrabold text-deep sm:text-3xl">{value}</div>
+      <div className="tabular mt-3 break-words text-[26px] font-semibold leading-tight tracking-tight text-ink sm:text-[30px]">{value}</div>
       {hint && <div className="mt-1 text-xs text-muted">{hint}</div>}
     </div>
   );
   return href ? <Link href={href} className="block h-full">{body}</Link> : body;
 }
 
-const Kpis = ({ children }: { children: React.ReactNode }) => <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">{children}</div>;
+const Kpis = ({ children }: { children: React.ReactNode }) => <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(190px,1fr))]">{children}</div>;
 
 function Actions({ items }: { items: (Act | false)[] }) {
   const list = items.filter((x): x is Act => !!x);
@@ -32,14 +32,14 @@ function Actions({ items }: { items: (Act | false)[] }) {
   return (
     <div className="mt-4 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3">
       {list.map((a) => (
-        <Link key={a.href} href={a.href} className="flex min-h-14 items-center gap-3 rounded-2xl bg-gradient-to-br from-blue to-deep p-4 text-white shadow-lg shadow-blue/20 transition hover:-translate-y-0.5 active:scale-[.98]"><a.icon className="size-5 shrink-0" /><span className="text-sm font-bold leading-tight">{a.label}</span></Link>
+        <Link key={a.href} href={a.href} className="group flex min-h-14 items-center gap-3 rounded-2xl border border-line/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(11,31,51,.04)] transition hover:-translate-y-0.5 hover:border-blue/40 hover:shadow-md active:scale-[.98]"><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-deep text-white transition group-hover:bg-blue"><a.icon className="size-[18px]" /></span><span className="text-[14px] font-semibold leading-tight text-ink">{a.label}</span><span className="ml-auto text-muted transition group-hover:translate-x-0.5 group-hover:text-blue">→</span></Link>
       ))}
     </div>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="mt-8 first:mt-0"><h2 className="mb-3 font-display text-lg font-extrabold text-deep">{title}</h2>{children}</section>;
+  return <section className="mt-10 first:mt-0"><h2 className="mb-3.5 flex items-center gap-2.5 text-[17px] font-semibold text-ink"><span className="h-4 w-1 rounded-full bg-blue" />{title}</h2>{children}</section>;
 }
 
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="text-sm text-muted">{children}</p>;

@@ -46,9 +46,9 @@ export function Button({ href, children, variant = "primary", className }: { hre
 
 export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: string; tone?: "red" }) {
   return (
-    <div className="rounded-2xl border border-line bg-white p-5">
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted">{label}</div>
-      <div className={cn("mt-2 font-display text-3xl font-extrabold", tone === "red" ? "text-vigil" : "text-deep")}>{value}</div>
+    <div className="rounded-2xl border border-line/80 bg-white p-5 shadow-[0_1px_2px_rgba(11,31,51,.04)]">
+      <div className="text-[12.5px] font-medium text-muted">{label}</div>
+      <div className={cn("tabular mt-1.5 text-[28px] font-semibold leading-tight tracking-tight", tone === "red" ? "text-vigil" : "text-ink")}>{value}</div>
       {hint && <div className="mt-1 text-xs text-muted">{hint}</div>}
     </div>
   );
@@ -56,20 +56,20 @@ export function Stat({ label, value, hint, tone }: { label: string; value: React
 
 export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; title: string; children?: ReactNode }) {
   return (
-    <div className="mb-8">
-      {eyebrow && <div className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-blue">{eyebrow}</div>}
-      <h1 className="text-3xl font-extrabold text-deep md:text-4xl">{title}</h1>
-      {children && <p className="mt-3 max-w-2xl text-muted">{children}</p>}
+    <div className="mb-7">
+      {eyebrow && <div className="mb-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-blue">{eyebrow}</div>}
+      <h1 className="text-[26px] font-semibold leading-tight tracking-tight text-ink md:text-[30px]">{title}</h1>
+      {children && <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{children}</p>}
     </div>
   );
 }
 
 export function Panel({ title, action, children, className }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={cn("min-w-0 rounded-2xl border border-line bg-white", className)}>
+    <section className={cn("min-w-0 rounded-2xl border border-line/80 bg-white shadow-[0_1px_2px_rgba(11,31,51,.04)]", className)}>
       {title && (
-        <header className="flex items-center justify-between border-b border-line px-5 py-3.5">
-          <h2 className="font-display text-base font-bold text-deep">{title}</h2>
+        <header className="flex items-center justify-between border-b border-line/70 px-5 py-3.5">
+          <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
           {action}
         </header>
       )}
@@ -83,7 +83,7 @@ export function Table({ head, children }: { head: string[]; children: ReactNode 
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-line text-xs uppercase tracking-wider text-muted">
+          <tr className="border-b border-line text-[11.5px] uppercase tracking-wider text-muted">
             {head.map((h) => (
               <th key={h} className="whitespace-nowrap px-3 py-2.5 font-semibold">{h}</th>
             ))}

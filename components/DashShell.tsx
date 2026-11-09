@@ -1,33 +1,53 @@
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { LogoutButton } from "./LogoutButton";
 import { AdminTabs } from "./AdminTabs";
 import { BottomTabs, SideLinks } from "./SideLinks";
 
-export interface NavItem { href: string; label: string; badge?: number; short?: string }
+export interface NavItem { href: string; label: string; badge?: number; short?: string; group?: string }
 
+const initials = (n: string) => n.split(/\s+/).filter((w) => !/^(dr|prof|mr|mrs|ms|amb)\.?$/i.test(w)).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "S";
+
+// Shared frame for the member portal and every committee console: navy sidebar on desktop, compact top bar + bottom tabs on phones.
 export function DashShell({ title, subtitle, nav, user, bottomTabs, children }: { title: string; subtitle: string; nav: NavItem[]; user: { name: string; role: string }; bottomTabs?: boolean | "admin"; children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-mist lg:grid lg:grid-cols-[264px_1fr]">
-      <aside className="sticky top-0 z-30 border-b border-line bg-white lg:h-screen lg:border-b-0 lg:border-r">
-        <div className="flex h-full flex-col p-3 lg:p-4">
-          <div className="flex items-center justify-between lg:block">
-            <Link href="/" className="flex items-center gap-3 px-2 py-1.5" aria-label="SATA public site">
-              <Logo size={38} />
-              <div><div className="font-display text-sm font-extrabold leading-tight text-deep">{title}</div><div className="text-[11px] text-muted">{subtitle}</div></div>
-            </Link>
-            <LogoutButton className="rounded-full px-3 py-2 text-xs font-semibold text-slate-500 hover:text-vigil lg:hidden" />
+    <div className="dash min-h-screen bg-[#f5f8fb] lg:grid lg:grid-cols-[272px_1fr]">
+      {/* Desktop sidebar */}
+      <aside className="sticky top-0 hidden h-screen flex-col bg-gradient-to-b from-[#0a3d66] to-[#06233d] text-white lg:flex">
+        <Link href="/" className="flex items-center gap-3 px-5 pb-2 pt-6" aria-label="SATA public site">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white shadow-sm"><Logo size={34} /></span>
+          <span className="min-w-0"><span className="block text-[15px] font-semibold leading-tight">{title}</span><span className="block truncate text-[11.5px] text-white/55">{subtitle}</span></span>
+        </Link>
+        <div className="dash-scroll flex-1 overflow-y-auto px-3 pb-4"><SideLinks items={nav} /></div>
+        <div className="m-3 rounded-xl bg-white/[.07] p-3">
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sky-300/20 text-[13px] font-semibold text-sky-200">{initials(user.name)}</span>
+            <div className="min-w-0"><div className="truncate text-[13px] font-semibold">{user.name}</div><div className="truncate text-[11.5px] text-white/55">{user.role}</div></div>
           </div>
-          <div className={bottomTabs ? "hidden lg:block" : ""}><SideLinks items={nav} /></div>
-          <div className="mt-auto hidden border-t border-line pt-4 lg:block">
-            <div className="truncate px-2 text-sm font-semibold text-deep">{user.name}</div>
-            <div className="px-2 text-xs capitalize text-muted">{user.role}</div>
-            <div className="mt-2 flex items-center justify-between px-1"><Link href="/" className="rounded-full px-2 py-1 text-xs font-medium text-slate-500 hover:text-blue">← Public site</Link><LogoutButton className="rounded-full px-2 py-1 text-xs font-medium text-slate-500 hover:text-vigil" /></div>
+          <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2.5">
+            <Link href="/" className="inline-flex items-center gap-1 text-[12px] font-medium text-white/60 hover:text-white">Public site <ArrowUpRight className="size-3.5" /></Link>
+            <LogoutButton className="text-[12px] font-medium text-white/60 hover:text-red-300" />
           </div>
         </div>
       </aside>
-      <main className={`min-w-0 p-4 sm:p-6 md:p-8 ${bottomTabs ? "pb-28 lg:pb-8" : ""}`}>{children}</main>
-      {bottomTabs === "admin" ? <AdminTabs items={nav} /> : bottomTabs ? <BottomTabs items={nav.slice(0, 6)} /> : null}
+
+      <div className="min-w-0">
+        {/* Phone top bar */}
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white/90 px-4 py-2.5 backdrop-blur lg:hidden">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="SATA public site">
+            <Logo size={32} />
+            <span><span className="block text-[14px] font-semibold leading-tight text-deep">{title}</span><span className="block text-[11px] text-muted">{subtitle}</span></span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <LogoutButton className="rounded-full px-2.5 py-1.5 text-[12px] font-medium text-slate-500 hover:text-vigil" />
+            <span className="grid size-8 place-items-center rounded-full bg-deep text-[12px] font-semibold text-white">{initials(user.name)}</span>
+          </div>
+        </header>
+        {/* Admin consoles on phones: the section list stays reachable through the "More" sheet; portal uses bottom tabs. */}
+        <main className={`mx-auto w-full max-w-[1280px] px-4 py-5 sm:px-6 sm:py-7 lg:px-10 lg:py-9 ${bottomTabs ? "pb-28 lg:pb-9" : ""}`}>{children}</main>
+      </div>
+      {bottomTabs === "admin" ? <AdminTabs items={nav} /> : bottomTabs ? <BottomTabs items={nav} /> : null}
     </div>
   );
 }

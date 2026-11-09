@@ -1,5 +1,6 @@
 import { DashShell } from "@/components/DashShell";
 import { requirePage } from "@/lib/auth";
+import { ROLE_LABEL } from "@/lib/types";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const me = await requirePage();
@@ -8,16 +9,17 @@ export default async function PortalLayout({ children }: { children: React.React
       title="My SATA"
       subtitle="Member portal"
       bottomTabs
-      user={{ name: me.name, role: me.role === "member" ? me.cadre : me.role }}
+      user={{ name: me.name, role: me.role === "member" ? me.cadre : ROLE_LABEL[me.role] }}
       nav={[
         { href: "/portal", label: "Dashboard" },
-        { href: "/portal/events", label: "Events & attendance" },
-        { href: "/portal/calendar", label: "Calendar" },
-        { href: "/portal/payments", label: "Payments & receipts" },
-        { href: "/portal/library", label: "My submissions" },
-        { href: "/portal/support", label: "Help desk" },
-        { href: "/portal/profile", label: "Profile" },
-        ...(me.role !== "member" ? [{ href: "/admin", label: "Open admin →" }] : []),
+        { href: "/portal/events", label: "Events & attendance", group: "Membership" },
+        { href: "/portal/calendar", label: "Calendar", group: "Membership" },
+        { href: "/portal/payments", label: "Payments & receipts", group: "Membership" },
+        { href: "/portal/library", label: "My submissions", group: "Library" },
+        { href: "/portal/submit", label: "Submit an article", group: "Library" },
+        { href: "/portal/support", label: "Help desk", group: "Account" },
+        { href: "/portal/profile", label: "Profile", group: "Account" },
+        ...(me.role !== "member" ? [{ href: "/admin", label: "Committee console", group: "Account" }] : []),
       ]}
     >
       {children}
