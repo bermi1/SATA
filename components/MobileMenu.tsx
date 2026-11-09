@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 
-export interface MenuGroup { label: string; href: string; external?: boolean; children?: { label: string; href: string }[] }
+export interface MenuGroup { label: string; href: string; external?: boolean; note?: string; children?: { label: string; href: string }[] }
 
 export function MobileMenu({ groups, signedIn, home }: { groups: MenuGroup[]; signedIn: boolean; home: string }) {
   const [open, setOpen] = useState(false);
@@ -31,10 +31,11 @@ export function MobileMenu({ groups, signedIn, home }: { groups: MenuGroup[]; si
           <nav className="flex-1 overflow-y-auto px-5 pb-6 pt-2">
             {groups.map((g, i) => g.children ? (
               <details key={g.label} className="group rise border-b border-white/10" style={{ animationDelay: `${i * 35}ms` }}>
-                <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-display text-2xl font-bold [&::-webkit-details-marker]:hidden">{g.label}<ChevronDown className="size-5 text-white/50 transition group-open:rotate-180" /></summary>
+                <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between py-4 font-display text-2xl font-bold [&::-webkit-details-marker]:hidden">{g.label}<ChevronDown className="size-5 text-white/50 transition group-open:rotate-180" /></summary>
                 <div className="grid gap-1 pb-4 pl-1">
-                  <Link href={g.href} onClick={close} className="py-2 text-[15px] font-semibold text-sky-300">All of {g.label.toLowerCase()} →</Link>
-                  {g.children.map((c) => <Link key={c.href} href={c.href} onClick={close} className="py-2 text-[15px] text-white/80">{c.label}</Link>)}
+                  <Link href={g.href} onClick={close} className="flex min-h-12 items-center text-base font-semibold text-sky-300">All of {g.label.toLowerCase()} →</Link>
+                  {g.children.map((c) => <Link key={c.href} href={c.href} onClick={close} className="flex min-h-12 items-center rounded-lg px-1 text-base text-white/85 active:bg-white/10">{c.label}</Link>)}
+                  {g.note && <p className="pb-1 pt-2 text-sm text-white/55">{g.note}</p>}
                 </div>
               </details>
             ) : (
@@ -43,9 +44,9 @@ export function MobileMenu({ groups, signedIn, home }: { groups: MenuGroup[]; si
               </Link>
             ))}
           </nav>
-          <div className="grid gap-3 p-5 pb-8">
-            <Link href={signedIn ? home : "/membership/apply"} onClick={close} className="rounded-full bg-white py-4 text-center text-base font-bold text-deep">{signedIn ? "Open my account" : "Join SATA"}</Link>
-            {!signedIn && <Link href="/login" onClick={close} className="rounded-full border border-white/30 py-4 text-center text-base font-semibold">Sign in</Link>}
+          <div className="grid grid-cols-2 gap-3 border-t border-white/10 p-5 pb-8">
+            <Link href={signedIn ? home : "/membership/apply"} onClick={close} className={`rounded-full bg-white py-4 text-center text-base font-bold text-deep ${signedIn ? "col-span-2" : ""}`}>{signedIn ? "Open my account" : "Join SATA"}</Link>
+            {!signedIn && <Link href="/login" onClick={close} className="order-first rounded-full border border-white/30 py-4 text-center text-base font-semibold">Sign in</Link>}
           </div>
         </div>
       )}

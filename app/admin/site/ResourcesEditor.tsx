@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { RowControls } from "@/components/RowControls";
+import { RESOURCE_LABEL } from "@/lib/types";
 
 interface Item { id: string; title: string; kind: string; description: string; url: string; membersOnly: boolean; year?: number; author?: string; closesAt?: string }
 
-const KINDS = [["report", "Report"], ["research", "Research"], ["publication", "Publication"], ["policy", "Policy"], ["guideline", "Guideline"], ["form", "Form"], ["media", "Photos & media"]];
+const KINDS = Object.entries(RESOURCE_LABEL);
 const box = "w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue focus:ring-4 focus:ring-blue/10";
 
 function ResourceForm({ item }: { item?: Item }) {
@@ -34,7 +35,7 @@ function ResourceForm({ item }: { item?: Item }) {
   return (
     <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
       <input name="title" required placeholder="Title" defaultValue={item?.title} className={`${box} sm:col-span-2`} />
-      <select name="kind" defaultValue={item?.kind ?? "publication"} className={box} aria-label="Type">{KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+      <select name="kind" defaultValue={item?.kind ?? "article"} className={box} aria-label="Type">{KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
       <input name="year" type="number" min={1990} max={2100} placeholder="Year" defaultValue={item?.year} className={box} aria-label="Year" />
       <input name="author" placeholder="Author or issuing body" defaultValue={item?.author} className={`${box} sm:col-span-2`} />
       <textarea name="description" required rows={2} placeholder="Short description" defaultValue={item?.description} className={`${box} sm:col-span-2`} />
@@ -54,6 +55,7 @@ function ResourceForm({ item }: { item?: Item }) {
 export default function ResourcesEditor({ items, writable }: { items: Item[]; writable: boolean }) {
   return (
     <div>
+      <p className="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">The library is now managed in one place: <a href="/admin/library" className="font-bold underline">Admin &rarr; Resource library</a>, where member submissions are also reviewed. This editor is kept for now but will be retired.</p>
       <ul className="divide-y divide-line">
         {items.map((r) => (
           <li key={r.id} className="py-3 first:pt-0">

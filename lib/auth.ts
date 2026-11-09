@@ -43,17 +43,23 @@ export async function getSession(): Promise<Member | null> {
   return m && m.status !== "suspended" ? m : null;
 }
 
-export type Area = "members" | "applications" | "events" | "attendance" | "payments" | "announcements" | "support" | "departments" | "reports" | "audit" | "messaging" | "subscribers" | "site";
+export type Area = "members" | "applications" | "events" | "attendance" | "payments" | "announcements" | "support" | "departments" | "reports" | "audit" | "messaging" | "subscribers" | "site" | "content" | "gallery" | "admins" | "broadcast";
 
+// Who does what. Management = membership approval, finance and broadcast communications;
+// Education = the resource library and approving member submissions; Social = events, webinars, news and gallery.
+const ALL: Area[] = ["members", "applications", "events", "attendance", "payments", "announcements", "support", "departments", "reports", "audit", "messaging", "subscribers", "site", "content", "gallery", "admins", "broadcast"];
 const MATRIX: Record<Exclude<Role, "member">, Area[]> = {
-  secretariat: ["members", "applications", "events", "attendance", "announcements", "support", "departments", "reports", "audit", "messaging", "subscribers", "site"],
-  treasurer: ["members", "payments", "reports", "events", "messaging", "subscribers"],
-  leadership: ["members", "events", "attendance", "reports", "departments", "announcements", "audit", "payments", "messaging", "subscribers"],
+  secretariat: ALL,
+  management: ["members", "applications", "payments", "messaging", "subscribers", "broadcast", "support", "reports", "audit", "admins"],
+  treasurer: ["members", "payments", "reports", "messaging", "subscribers"],
+  education: ["content", "reports"],
+  social: ["events", "attendance", "announcements", "gallery", "site", "reports"],
+  leadership: ["members", "events", "attendance", "reports", "departments", "announcements", "audit", "payments", "messaging", "subscribers", "content", "gallery", "broadcast"],
 };
 
 export const can = (role: Role, area: Area) => role !== "member" && MATRIX[role].includes(area);
 export const canWrite = (role: Role, area: Area) =>
-  can(role, area) && !(role === "leadership" && ["members", "payments", "attendance", "events", "messaging", "subscribers"].includes(area));
+  can(role, area) && role !== "leadership"; // leadership can view everything it sees, but not change it
 
 export const isAdmin = (m: Member | null): m is Member => !!m && m.role !== "member";
 

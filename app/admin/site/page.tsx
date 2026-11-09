@@ -2,24 +2,30 @@ import Image from "next/image";
 import MultipartForm from "@/components/MultipartForm";
 import { RowControls } from "@/components/RowControls";
 import { PageHeader, Panel } from "@/components/ui";
-import { canWrite, requirePage } from "@/lib/auth";
-import { getSettings, listPartners, listTeam } from "@/lib/store";
+import { can, canWrite, requirePage } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getSettings, listGallery, listPartners, listResources, listTeam } from "@/lib/store";
 import BannersEditor from "./BannersEditor";
 import GalleryEditor from "./GalleryEditor";
 import ResourcesEditor from "./ResourcesEditor";
 import SettingsForm from "./SettingsForm";
-import { listGallery, listResources } from "@/lib/store";
+
 
 const GROUPS = [{ value: "executive", label: "Executive Committee" }, { value: "committee", label: "AAAC 2027 organising committee" }];
 const unopt = (s: string) => s.startsWith("/api/");
 
 export default async function SiteEditor() {
-  const me = await requirePage("site");
+  const me = await requirePage();
+  const showSite = can(me.role, "site"), showGallery = can(me.role, "gallery"), showResources = can(me.role, "content");
+  if (!showSite && !showGallery) redirect("/admin");
   const writable = canWrite(me.role, "site");
+  const galleryWritable = canWrite(me.role, "gallery");
+  const resourcesWritable = canWrite(me.role, "content");
   const team = await listTeam();
   const partners = await listPartners();
   const settings = await getSettings();
-  const resources = await listResources(true);
+  const resources = showResources ? await listResources(true) : [];
+  const albums = showGallery ? await listGallery() : [];
 
   const teamFields = (m?: (typeof team)[number]) => [
     { name: "name", label: "Full name", defaultValue: m?.name, span: true },
@@ -33,11 +39,12 @@ export default async function SiteEditor() {
     <>
       <PageHeader eyebrow="Website" title="Edit the public website">Change the pictures, people, partners and details visitors see. Changes go live immediately.</PageHeader>
       <nav className="-mt-2 mb-6 flex flex-wrap gap-2 text-xs font-bold" aria-label="Sections">
-        {[["team", "Team & leadership"], ["partners", "Partners"], ["hero", "Hero & contact"], ["banners", "Page banners"], ["gallery", "Gallery"], ["resources", "Resources"]].map(([id, l]) => <a key={id} href={`#${id}`} className="rounded-full bg-white px-4 py-2 text-deep ring-1 ring-line hover:text-blue hover:ring-blue">{l}</a>)}
+        {[["team", "Team & leadership", showSite], ["partners", "Partners", showSite], ["hero", "Hero & contact", showSite], ["banners", "Page banners", showSite], ["gallery", "Gallery", showGallery], ["resources", "Resources", showResources]].filter((x) => x[2]).map(([id, l]) => <a key={String(id)} href={`#${id}`} className="rounded-full bg-white px-4 py-2 text-deep ring-1 ring-line hover:text-blue hover:ring-blue">{String(l)}</a>)}
       </nav>
-      {!writable && <p className="mb-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Your role can view this page but not change it.</p>}
+      {showSite && !writable && <p className="mb-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Your role can view this page but not change it.</p>}
 
       <div className="grid gap-6">
+        {showSite && (<>
         <section id="team" className="scroll-mt-24">
           <Panel title={`Team & leadership (${team.length})`}>
             <ul className="divide-y divide-line">
@@ -94,16 +101,21 @@ export default async function SiteEditor() {
         <section id="banners" className="scroll-mt-24">
           <Panel title="Page banners"><p className="mb-4 text-sm text-muted">The photograph at the top of each inner page. Choose a wide, high-resolution image.</p><BannersEditor banners={settings.pageHeroes ?? {}} focus={settings.pageHeroFocus ?? {}} writable={writable} /></Panel>
         </section>
+        </>)}
 
+        {showGallery && (
         <section id="gallery" className="scroll-mt-24">
-          <Panel title={`Gallery (${(await listGallery()).length} albums)`}><p className="mb-4 text-sm text-muted">Two or three featured pictures per event, plus a link to the full album. The two newest albums appear in the Resources menu.</p><GalleryEditor albums={await listGallery()} writable={writable} /></Panel>
+          <Panel title={`Gallery (${albums.length} albums)`}><p className="mb-4 text-sm text-muted">Two or three featured pictures per event, plus a link to the full album. The two newest albums appear in the News & Events menu.</p><GalleryEditor albums={albums} writable={galleryWritable} /></Panel>
         </section>
+        )}
 
+        {showResources && (
         <section id="resources" className="scroll-mt-24">
           <Panel title={`Resources (${resources.length})`}>
-            <ResourcesEditor items={resources} writable={writable} />
+            <ResourcesEditor items={resources} writable={resourcesWritable} />
           </Panel>
         </section>
+        )}
       </div>
     </>
   );

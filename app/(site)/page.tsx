@@ -10,6 +10,7 @@ import { excerpt } from "@/components/RichText";
 import { EVENT_LABEL, fmtDate, fmtRange } from "@/components/ui";
 import { FEES, fmtTZS } from "@/lib/config";
 import { calendarEntries, getSettings, listAnnouncements, listEvents, listPartners, listResources, listTeam } from "@/lib/store";
+import { RESOURCE_LABEL } from "@/lib/types";
 
 const PILLARS = [
   { icon: ShieldCheck, t: "Patient safety", d: "Standards and a culture of vigilance in every theatre and ICU." },
@@ -30,7 +31,7 @@ export default async function Home() {
   const partners = await listPartners();
   const todayKey = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Dar_es_Salaam" }).format(new Date());
   const keyDates = (await calendarEntries({ members: false })).filter((e) => e.start.slice(0, 10) >= todayKey && !e.sample).slice(0, 4);
-  const library = (await listResources(false)).filter((r) => r.kind === "report" || r.kind === "research" || r.kind === "policy").slice(0, 3);
+  const library = (await listResources()).filter((r) => r.kind === "research" || r.kind === "article").sort((a, b) => (b.year ?? 0) - (a.year ?? 0)).slice(0, 3);
 
   return (
     <>
@@ -184,11 +185,11 @@ export default async function Home() {
       {/* Publications */}
       <section className={sec}>
         <Reveal>
-          <div className="flex items-end justify-between gap-4"><SectionHead eyebrow="Resources" title="Reports, research and policy." /><Link href="/resources" className="hidden shrink-0 items-center gap-2 text-sm font-bold text-blue sm:inline-flex">Open the library <ArrowRight className="size-4" /></Link></div>
+          <div className="flex items-end justify-between gap-4"><SectionHead eyebrow="Resources" title="Research and articles." /><Link href="/resources" className="hidden shrink-0 items-center gap-2 text-sm font-bold text-blue sm:inline-flex">Open the library <ArrowRight className="size-4" /></Link></div>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {library.map((r) => (
-              <Link key={r.id} href={r.url} {...(r.url.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})} className="group rounded-lg border border-line bg-white p-5 transition hover:border-blue hover:shadow-md hover:shadow-ink/5">
-                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-blue">{r.kind}{r.year && <span className="text-muted">· {r.year}</span>}</div>
+              <Link key={r.id} href={`/resources/${r.id}`} className="group rounded-lg border border-line bg-white p-5 transition hover:border-blue hover:shadow-md hover:shadow-ink/5">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-blue">{RESOURCE_LABEL[r.kind]}{r.year && <span className="text-muted">· {r.year}</span>}</div>
                 <h3 className="mt-2 font-display text-base font-bold leading-snug text-deep group-hover:text-blue">{r.title}</h3>
                 <p className="mt-1.5 line-clamp-2 text-sm text-muted">{r.description}</p>
               </Link>

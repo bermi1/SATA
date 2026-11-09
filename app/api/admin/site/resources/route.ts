@@ -18,7 +18,7 @@ const schema = z.object({
 
 // Multipart: publication details plus either a PDF upload ("file") or an external link ("url").
 export async function POST(req: Request) {
-  const me = await guard("site");
+  const me = await guard("content");
   if (me instanceof Response) return me;
   const fd = await req.formData().catch(() => null);
   if (!fd) return Response.json({ error: "Invalid form" }, { status: 400 });
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const me = await guard("site");
+  const me = await guard("content");
   if (me instanceof Response) return me;
   const body = (await req.json().catch(() => null)) as { id?: string } | null;
   const res = await deleteResource(body?.id ?? "", me.name);

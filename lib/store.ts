@@ -2,12 +2,14 @@ import { repo } from "./db";
 import { SETTINGS_SEED } from "./db/seed-data";
 import { FEES } from "./config";
 import { normalizePhone } from "./sms";
+import { sendRenewalEmail, sendWelcomeEmail } from "./member-mail";
 import type { TeamMember } from "./team";
 import type {
   Attendance, AudienceSpec, AuditEntry, Category, Member, MessageLog, Notification, Payment, PayMethod, PayPurpose,
   Announcement, CalendarItem, CalEntry, Enquiry, GalleryAlbum, Registration, Resource, Role, SataEvent, SitePartner, SiteSettings, Subscriber, Ticket,
   Department, Officer,
 } from "./types";
+import { normalizeKind } from "./types";
 
 const R = () => repo();
 
@@ -52,8 +54,34 @@ export async function listAnnouncements(audience: "public" | "member" | "leaders
   const all = await R().list<Announcement>("announcements");
   return all.filter((a) => a.audience === "all" || (audience !== "public" && a.audience === "members") || (audience === "leadership" && a.audience === "leadership")).sort(byDateDesc((a) => a.createdAt));
 }
-export async function listResources(member: boolean) {
-  return (await R().list<Resource>("resources")).filter((r) => member || !r.membersOnly);
+const normResource = (r: Resource): Resource => ({ ...r, kind: normalizeKind(r.kind), status: r.status ?? "published" });
+/** Published library items (kinds normalised). Opening a file is gated separately; the listing shows everything. */
+export async function listResources(_member = true) {
+  return (await R().list<Resource>("resources")).map(normResource).filter((r) => r.status === "published");
+}
+/** Every library item in any status, for the Education committee. */
+export async function listAllResources() {
+  return (await R().list<Resource>("resources")).map(normResource).sort((a, b) => (b.submittedAt ?? "").localeCompare(a.submittedAt ?? "") || (b.year ?? 0) - (a.year ?? 0));
+}
+export async function getResource(id: string) {
+  const r = await R().get<Resource>("resources", id);
+  return r ? normResource(r) : null;
+}
+export async function submitResource(member: Member, input: Pick<Resource, "title" | "kind" | "description" | "author" | "year" | "url">) {
+  const r: Resource = { ...input, id: uid("res"), membersOnly: true, status: "pending", submittedBy: member.id, submittedAt: nowIso() };
+  await R().put("resources", r);
+  await log(member.name, `Submitted to library: ${r.title}`);
+  return r;
+}
+export async function reviewResource(id: string, decision: "approve" | "reject", note: string, reviewer: string) {
+  const r = await R().get<Resource>("resources", id);
+  if (!r) return { error: "Item not found" as const };
+  r.status = decision === "approve" ? "published" : "rejected";
+  r.reviewedBy = reviewer;
+  r.reviewNote = note || null;
+  await R().put("resources", r);
+  await log(reviewer, `${decision === "approve" ? "Approved" : "Rejected"} library item: ${r.title}`);
+  return { resource: normResource(r) };
 }
 export const listTickets = async () => (await R().list<Ticket>("tickets")).sort(byDateDesc((t) => t.createdAt));
 export const listAudit = () => R().list<AuditEntry>("audit", undefined, { orderBy: "at", desc: true, limit: 80 });
@@ -175,7 +203,7 @@ export async function recordAttendance(
 }
 
 // ───── members
-export async function applyForMembership(input: { name: string; email: string; phone: string; category: Category; cadre: string; facility: string; region: string }) {
+export async function applyForMembership(input: { name: string; email: string; phone: string; category: Category; cadre: string; facility: string; region: string; application?: Record<string, unknown> | null }) {
   const email = input.email.trim().toLowerCase();
   if (await getMemberByEmail(email)) return { error: "An application with this email already exists" as const };
   const n = await R().seq("member");
@@ -194,8 +222,10 @@ export async function decideApplication(id: string, approve: boolean, actor: str
   if (approve) {
     m.status = "active";
     m.paidThrough = m.category === "honorary" ? null : renewalDate().toISOString();
+    m.application = { ...(m.application ?? {}), approvedAt: nowIso() };
     await R().put("members", m);
     await addNotification(m.id, "Welcome to SATA", `Your application was approved. Your membership number is ${m.memberNo}.`, "general");
+    await sendWelcomeEmail(m);
   } else {
     m.status = "suspended";
     await R().put("members", m);
@@ -222,11 +252,13 @@ async function applyPaymentEffects(p: Payment) {
   const m = p.memberId ? await getMember(p.memberId) : null;
   if (!m) return;
   if (p.purpose === "subscription" || p.purpose === "registration") {
+    const wasPending = m.status === "pending";
     const current = m.paidThrough ? new Date(m.paidThrough) : null;
     m.paidThrough = (current && current > new Date() ? new Date(current.getFullYear() + 1, 5, 30) : renewalDate()).toISOString();
     if (m.status === "lapsed") m.status = "active";
     m.lastReminderAt = null;
     await R().put("members", m);
+    if (!wasPending) await sendRenewalEmail(m);
   }
   if (p.purpose === "event" && p.eventId) {
     const r = (await listRegistrations(p.eventId)).find((x) => x.memberId === m.id);

@@ -13,7 +13,7 @@ const schema = z.object({
 
 // Multipart: album details plus up to three "photos". Adding photos to an existing album appends them.
 export async function POST(req: Request) {
-  const me = await guard("site");
+  const me = await guard("gallery");
   if (me instanceof Response) return me;
   const fd = await req.formData().catch(() => null);
   if (!fd) return Response.json({ error: "Invalid form" }, { status: 400 });
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const me = await guard("site");
+  const me = await guard("gallery");
   if (me instanceof Response) return me;
   const body = (await req.json().catch(() => null)) as { id?: string; photo?: string } | null;
   if (!body?.id || !body.photo) return Response.json({ error: "Invalid request" }, { status: 400 });
@@ -46,7 +46,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const me = await guard("site");
+  const me = await guard("gallery");
   if (me instanceof Response) return me;
   const body = (await req.json().catch(() => null)) as { id?: string } | null;
   const res = await deleteAlbum(body?.id ?? "", me.name);

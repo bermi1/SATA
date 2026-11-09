@@ -23,7 +23,7 @@ const schema = z.object({
 
 /** Saves edits to a draft: subject, intro and the full ordered item list (reorder, remove, pin and custom items all go through here). */
 export async function PUT(req: Request) {
-  const me = await guard("announcements");
+  const me = await guard("broadcast");
   if (me instanceof Response) return me;
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: parsed.error.issues[0]?.message ?? "Invalid request" }, { status: 400 });

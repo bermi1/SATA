@@ -18,7 +18,7 @@ const COLS: { title: string; links: [string, string, boolean?][] }[] = [
   { title: "Society", links: [["About SATA", "/about"], ["Our objectives", "/about#objectives"], ["Leadership & governance", "/leadership"], ["Departments", "/leadership#departments"], ["News", "/news"], ["Contact us", "/contact"]] },
   { title: "Membership", links: [["Join SATA", "/membership/apply"], ["Categories & fees", "/membership#fees"], ["Member portal", "/portal"], ["Renew membership", "/portal/payments"], ["Verify a member", "/verify"], ["Sign in", "/login"]] },
   { title: "Events & learning", links: [["All events", "/events"], ["Photo gallery", "/gallery"], ["AAAC 2027", "https://aaac2027.com", true], ["SATA Marathon", "/events/sata-marathon"], ["Resource library", "/resources"]] },
-  { title: "Resources", links: [["Conference reports", "/resources?kind=report"], ["Research & abstracts", "/resources?kind=research"], ["Policy & guidelines", "/resources?kind=policy"], ["Forms", "/resources?kind=form"], ["Media", "/resources?kind=media"]] },
+  { title: "Resources", links: [["Guidelines", "/resources?kind=guideline"], ["Forms", "/resources?kind=form"], ["Research", "/resources?kind=research"], ["Case studies", "/resources?kind=case"], ["Articles", "/resources?kind=article"]] },
 ];
 
 const LEGAL: [string, string][] = [["Privacy Policy", "/privacy"], ["Terms of Use", "/terms"], ["Accessibility", "/accessibility"], ["Sitemap", "/sitemap.xml"]];

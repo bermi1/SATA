@@ -7,8 +7,8 @@ import Compose from "./Compose";
 import Editor from "./Editor";
 
 export default async function NewsletterPage() {
-  const me = await requirePage("announcements");
-  const writable = canWrite(me.role, "announcements");
+  const me = await requirePage("broadcast");
+  const writable = canWrite(me.role, "broadcast");
   const [draft, all, recipients] = await Promise.all([currentDraft(), listNewsletters(), newsletterRecipients()]);
   const sent = all.filter((n) => n.status === "sent");
   const live = emailProvider() === "resend";

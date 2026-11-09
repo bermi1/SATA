@@ -3,7 +3,7 @@ import { guard } from "@/lib/auth";
 import { getNewsletter, sendTest } from "@/lib/newsletter";
 
 export async function POST(req: Request) {
-  const me = await guard("announcements");
+  const me = await guard("broadcast");
   if (me instanceof Response) return me;
   const parsed = z.object({ id: z.string().min(1) }).safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });

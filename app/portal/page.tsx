@@ -31,6 +31,24 @@ export default async function Dashboard() {
           <Card3D name={me.name} memberNo={me.memberNo} category={FEES[me.category].label} cadre={me.cadre} good={good}
             validUntil={me.paidThrough ? fmtDate(me.paidThrough) : me.category === "honorary" ? "Lifetime" : "—"} verifyUrl={`${origin}/verify/${me.memberNo}`} />
           <p className="mt-3 text-center text-xs text-muted">Employers scan the QR code to confirm your standing.</p>
+          {me.status !== "pending" && me.status !== "suspended" && (
+            <div className="mt-5 rounded-2xl border border-line bg-white p-5">
+              <div className="font-display text-base font-bold text-deep">Certificate and ID card</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a href={`/api/certificate/${me.memberNo}?download=1`} className="rounded-full bg-blue px-4 py-2 text-xs font-bold text-white hover:bg-deep">Download certificate</a>
+                <a href={`/api/card/${me.memberNo}?download=1`} className="rounded-full border border-blue px-4 py-2 text-xs font-bold text-blue hover:bg-mist">Download ID card</a>
+              </div>
+              <details className="mt-3 text-xs">
+                <summary className="cursor-pointer font-semibold text-blue">Preview</summary>
+                <div className="mt-3 space-y-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/api/certificate/${me.memberNo}`} alt="Membership certificate" loading="lazy" className="w-full rounded-lg border border-line" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/api/card/${me.memberNo}`} alt="Digital ID card" loading="lazy" className="w-full max-w-sm rounded-xl border border-line" />
+                </div>
+              </details>
+            </div>
+          )}
         </div>
         <div className="grid content-start gap-4 sm:grid-cols-3">
           {[

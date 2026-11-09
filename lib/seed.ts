@@ -134,9 +134,9 @@ export function buildSeed() {
   const resources: Resource[] = [
     { id: "r1", title: "SATA Constitution", kind: "guideline", description: "Registered under the NGOs Act No. 24 of 2002.", membersOnly: false, url: "#" },
     { id: "r2", title: "Membership Application Guide", kind: "form", description: "Eligibility, fees and how to join.", membersOnly: false, url: "/membership" },
-    { id: "r3", title: "10th Conference Abstract Book", kind: "report", description: "All accepted abstracts, Mbeya 2026.", membersOnly: true, url: "#" },
+    { id: "r3", title: "10th Conference Abstract Book", kind: "research", description: "All accepted abstracts, Mbeya 2026.", membersOnly: true, url: "#" },
     { id: "r4", title: "Perioperative Safety Checklist", kind: "guideline", description: "Evidence-based checklist for theatre teams.", membersOnly: true, url: "#" },
-    { id: "r5", title: "Mechanical Ventilation Workshop Slides", kind: "media", description: "Mbeya 2026 workshop deck.", membersOnly: true, url: "#" },
+    { id: "r5", title: "Mechanical Ventilation Workshop Slides", kind: "article", description: "Mbeya 2026 workshop deck.", membersOnly: true, url: "#" },
   ];
 
   const tickets: Ticket[] = [];

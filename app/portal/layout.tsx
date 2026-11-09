@@ -14,6 +14,7 @@ export default async function PortalLayout({ children }: { children: React.React
         { href: "/portal/events", label: "Events & attendance" },
         { href: "/portal/calendar", label: "Calendar" },
         { href: "/portal/payments", label: "Payments & receipts" },
+        { href: "/portal/library", label: "My submissions" },
         { href: "/portal/support", label: "Help desk" },
         { href: "/portal/profile", label: "Profile" },
         ...(me.role !== "member" ? [{ href: "/admin", label: "Open admin →" }] : []),

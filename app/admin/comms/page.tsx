@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import ActionButton from "@/components/ActionButton";
 import MultipartForm from "@/components/MultipartForm";
 import { RowControls } from "@/components/RowControls";
 import { Badge, fmtDate, PageHeader, Panel } from "@/components/ui";
-import { canWrite, requirePage } from "@/lib/auth";
+import { can, canWrite, requirePage } from "@/lib/auth";
 import { listAnnouncements, listEnquiries, listTickets, memberMap } from "@/lib/store";
 
 export default async function Comms() {
-  const me = await requirePage("announcements");
+  const me = await requirePage();
+  if (!can(me.role, "broadcast") && !can(me.role, "announcements") && !can(me.role, "support")) redirect("/admin");
   const mm = await memberMap();
   const items = await listAnnouncements("leadership");
   const tickets = await listTickets();
@@ -31,7 +33,7 @@ export default async function Comms() {
           </Panel>
         )}
 
-        <Panel title={`Website enquiries${open ? ` (${open} new)` : ""}`}>
+        {can(me.role, "support") && <Panel title={`Website enquiries${open ? ` (${open} new)` : ""}`}>
           {enquiries.length === 0 ? <p className="text-sm text-muted">No messages yet. They arrive from the Contact page.</p> : (
             <ul className="divide-y divide-line">
               {enquiries.slice(0, 12).map((q) => (
@@ -48,9 +50,9 @@ export default async function Comms() {
               ))}
             </ul>
           )}
-        </Panel>
+        </Panel>}
 
-        <Panel title="Member help-desk tickets">
+        {can(me.role, "support") && <Panel title="Member help-desk tickets">
           {tickets.length === 0 ? <p className="text-sm text-muted">No tickets yet. Members open them from their portal.</p> : (
             <ul className="divide-y divide-line">{tickets.map((t) => (
               <li key={t.id} className="py-3 first:pt-0">
@@ -59,7 +61,7 @@ export default async function Comms() {
               </li>
             ))}</ul>
           )}
-        </Panel>
+        </Panel>}
 
         <Panel title="Published news">
           <ul className="divide-y divide-line">

@@ -1,6 +1,12 @@
 export type Category = "full" | "associate" | "honorary";
 export type MemberStatus = "pending" | "active" | "lapsed" | "suspended";
-export type Role = "member" | "secretariat" | "treasurer" | "leadership";
+/** "secretariat" = full administrator. Committees: management (membership, finance and communications),
+ *  education (educational content and the resource library), social (events, webinars, news and gallery). */
+export type Role = "member" | "secretariat" | "management" | "treasurer" | "education" | "social" | "leadership";
+export const ROLE_LABEL: Record<Role, string> = {
+  member: "Member", secretariat: "Secretariat (full admin)", management: "Management & finance", treasurer: "Treasurer",
+  education: "Education committee", social: "Social committee", leadership: "Leadership (view only)",
+};
 
 export interface Member {
   id: string;
@@ -19,6 +25,8 @@ export interface Member {
   role: Role;
   departmentIds: string[];
   lastReminderAt?: string | null;
+  /** Extra answers from the membership application form (gender, nationality, payment proof, ...). */
+  application?: Record<string, unknown> | null;
 }
 
 export type EventType = "conference" | "agm" | "workshop" | "webinar" | "meeting" | "marathon" | "training";
@@ -127,7 +135,11 @@ export interface Enquiry {
   status: "new" | "handled";
 }
 
-export const RESOURCE_KINDS = ["report", "research", "publication", "policy", "guideline", "form", "media"] as const;
+export const RESOURCE_KINDS = ["guideline", "form", "research", "case", "article"] as const;
+export const RESOURCE_LABEL: Record<(typeof RESOURCE_KINDS)[number], string> = { guideline: "Guidelines", form: "Forms", research: "Research", case: "Case studies", article: "Articles" };
+/** Older kinds from before the library was reorganised. */
+export const normalizeKind = (k: string): (typeof RESOURCE_KINDS)[number] =>
+  (RESOURCE_KINDS as readonly string[]).includes(k) ? (k as (typeof RESOURCE_KINDS)[number]) : k === "policy" ? "guideline" : "article";
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];
 
 export interface Resource {
@@ -140,6 +152,12 @@ export interface Resource {
   year?: number;
   author?: string;
   closesAt?: string; // "YYYY-MM-DD": after this date the item is shown as Closed
+  /** Member submissions wait for the Education committee. Missing = published (items added by admins). */
+  status?: "pending" | "published" | "rejected";
+  submittedBy?: string | null; // member id
+  submittedAt?: string | null;
+  reviewedBy?: string | null;
+  reviewNote?: string | null;
 }
 
 export const isClosed = (r: { closesAt?: string }, today = new Date().toISOString().slice(0, 10)) => !!r.closesAt && r.closesAt < today;
