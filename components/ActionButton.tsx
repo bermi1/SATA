@@ -10,6 +10,9 @@ interface Props {
   variant?: "primary" | "ghost" | "danger";
   confirm?: string;
   doneLabel?: string;
+  /** Where to go after success (default: stay and refresh). */
+  redirect?: string;
+  size?: "sm" | "lg";
 }
 
 const V = {
@@ -18,7 +21,7 @@ const V = {
   danger: "border border-vigil/30 bg-white text-vigil hover:bg-vigil/5",
 };
 
-export default function ActionButton({ url, body, label, variant = "primary", confirm: ask, doneLabel }: Props) {
+export default function ActionButton({ url, body, label, variant = "primary", confirm: ask, doneLabel, redirect, size = "sm" }: Props) {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "busy" | "done" | "err">("idle");
   const [err, setErr] = useState("");
@@ -30,7 +33,7 @@ export default function ActionButton({ url, body, label, variant = "primary", co
     const data = await res?.json().catch(() => ({}));
     if (res?.ok) {
       setState("done");
-      router.refresh();
+      if (redirect) router.push(redirect); else router.refresh();
     } else {
       setErr(data?.error ?? "Failed");
       setState("err");
@@ -39,7 +42,7 @@ export default function ActionButton({ url, body, label, variant = "primary", co
 
   return (
     <span className="inline-flex flex-col items-start gap-1">
-      <button onClick={run} disabled={state === "busy" || state === "done"} className={`rounded-full px-4 py-1.5 text-xs font-semibold transition disabled:opacity-60 ${V[variant]}`}>
+      <button onClick={run} disabled={state === "busy" || state === "done"} className={`rounded-full font-semibold transition disabled:opacity-60 ${size === "lg" ? "px-6 py-3 text-sm" : "px-4 py-1.5 text-xs"} ${V[variant]}`}>
         {state === "busy" ? "…" : state === "done" ? doneLabel ?? "Done" : label}
       </button>
       {state === "err" && <span className="text-xs text-vigil">{err}</span>}

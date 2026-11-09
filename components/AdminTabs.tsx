@@ -29,7 +29,7 @@ export function AdminTabs({ items }: { items: NavItem[] }) {
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="More">
           <button className="absolute inset-0 bg-ink/50" aria-label="Close" onClick={() => setOpen(false)} />
-          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl">
+          <div className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto overscroll-contain rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl">
             <div className="mb-3 flex items-center justify-between"><div className="font-display text-lg font-extrabold text-deep">More</div><button onClick={() => setOpen(false)} aria-label="Close" className="grid size-9 place-items-center rounded-full bg-mist"><X className="size-5" /></button></div>
             <ul className="grid gap-1">
               {rest.map((i) => (

@@ -24,7 +24,7 @@ const isActive = (href: string, path: string) => href === path || (href.split("/
 const STORE = "sata-nav-open";
 
 // Grouped, icon-led navigation on the navy sidebar (desktop). Groups collapse; the one holding the current page is always open.
-export function SideLinks({ items }: { items: NavItem[] }) {
+export function SideLinks({ items, collapsible = true }: { items: NavItem[]; collapsible?: boolean }) {
   const path = usePathname();
   const groups: { name: string; items: NavItem[] }[] = [];
   for (const i of items) {
@@ -38,7 +38,7 @@ export function SideLinks({ items }: { items: NavItem[] }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- restore the person's open/closed groups after hydration
     try { setOpen(JSON.parse(localStorage.getItem(STORE) ?? "{}")); } catch { /* storage blocked */ }
   }, []);
-  const isOpen = (name: string) => !name || name === current || (open[name] ?? false);
+  const isOpen = (name: string) => !collapsible || !name || name === current || (open[name] ?? false);
   const toggle = (name: string) => setOpen((o) => {
     const next = { ...o, [name]: !isOpen(name) };
     try { localStorage.setItem(STORE, JSON.stringify(next)); } catch { /* ignore */ }
@@ -49,7 +49,8 @@ export function SideLinks({ items }: { items: NavItem[] }) {
     <nav className="mt-6 grid gap-1" aria-label="Dashboard">
       {groups.map((g) => (
         <div key={g.name || "main"} className={g.name ? "" : "mb-3"}>
-          {g.name && (
+          {g.name && !collapsible && <div className="mb-1 mt-2 px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/40">{g.name}</div>}
+          {g.name && collapsible && (
             <button onClick={() => toggle(g.name)} aria-expanded={isOpen(g.name)}
               className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/45 transition hover:bg-white/[.04] hover:text-white/75">
               <span className="flex items-center gap-2">{g.name}{!isOpen(g.name) && g.items.some((i) => i.badge) && <span className="size-1.5 rounded-full bg-vigil" />}</span>

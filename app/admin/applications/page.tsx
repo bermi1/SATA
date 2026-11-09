@@ -1,54 +1,52 @@
-import ActionButton from "@/components/ActionButton";
-import { Badge, fmtDate, PageHeader, Panel, Table } from "@/components/ui";
-import { canWrite, requirePage } from "@/lib/auth";
+import { ChevronRight, FileCheck2, TriangleAlert } from "lucide-react";
+import Link from "next/link";
+import { Badge, fmtDate, PageHeader } from "@/components/ui";
+import { requirePage } from "@/lib/auth";
 import { FEES, fmtTZS } from "@/lib/config";
 import { listMembers } from "@/lib/store";
-import type { Member } from "@/lib/types";
-
-const LABELS: [string, string][] = [
-  ["gender", "Gender"], ["nationality", "Nationality"], ["qualification", "Qualification"], ["superspecialization", "Superspecialization"],
-  ["superspecializationDetails", "Superspecialization details"], ["councilNo", "Medical Council no."], ["employer", "Employer"], ["jobTitle", "Job title"],
-  ["yearsOfPractice", "Years of practice"], ["address", "Postal address"],
-];
-
-function Details({ m }: { m: Member }) {
-  const a = m.application;
-  if (!a) return <div className="mt-1 text-xs text-muted">No extra application details (submitted before the new form).</div>;
-  const link = (u: unknown, label: string) => typeof u === "string" && u ? <a href={u} target="_blank" rel="noreferrer" className="font-semibold text-blue underline">{label}</a> : <span className="text-muted">none</span>;
-  return (
-    <details className="mt-1.5 text-xs">
-      <summary className="cursor-pointer font-semibold text-blue">View full application</summary>
-      <dl className="mt-2 grid max-w-md grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-        {LABELS.filter(([k]) => a[k] !== undefined && a[k] !== "").map(([k, l]) => <div key={k} className="contents"><dt className="text-muted">{l}</dt><dd className="text-deep">{String(a[k])}</dd></div>)}
-        <dt className="text-muted">Amount paid</dt><dd className="font-semibold text-deep">{typeof a.amountPaid === "number" ? fmtTZS(a.amountPaid) : "-"}</dd>
-        <dt className="text-muted">Proof of payment</dt><dd>{link(a.paymentProof, "Open proof")}</dd>
-        <dt className="text-muted">Practising licence</dt><dd>{link(a.licence, "Open licence")}</dd>
-        <dt className="text-muted">Declaration</dt><dd className="text-deep">{a.declaration ? "Agreed" : "-"}</dd>
-      </dl>
-    </details>
-  );
-}
 
 export default async function Applications() {
-  const me = await requirePage("applications");
-  const pending = (await listMembers()).filter((m) => m.status === "pending");
-  const writable = canWrite(me.role, "applications");
+  await requirePage("applications");
+  const pending = (await listMembers()).filter((m) => m.status === "pending").sort((a, b) => a.joinedAt.localeCompare(b.joinedAt));
   return (
     <>
-      <PageHeader eyebrow="Membership & Welfare" title="Applications">Verify credentials, then approve. Approval activates the member, issues their card and starts their renewal clock.</PageHeader>
-      <Panel>
-        {pending.length === 0 ? <p className="text-sm text-muted">No applications are waiting. 🎉</p> : (
-          <Table head={["Applicant", "Category", "Cadre", "Facility", "Region", "Applied", "Fee", ""]}>
-            {pending.map((m) => (
-              <tr key={m.id}>
-                <td><div className="font-semibold text-deep">{m.name}</div><div className="text-xs text-muted">{m.email} · {m.phone}</div><Details m={m} /></td>
-                <td><Badge tone="blue">{FEES[m.category].label}</Badge></td><td>{m.cadre}</td><td>{m.facility}</td><td>{m.region}</td><td>{fmtDate(m.joinedAt)}</td><td>{fmtTZS(FEES[m.category].registration)}</td>
-                <td>{writable && <div className="flex gap-2"><ActionButton url={`/api/admin/applications/${m.id}`} body={{ approve: true }} label="Approve" doneLabel="Approved" /><ActionButton url={`/api/admin/applications/${m.id}`} body={{ approve: false }} label="Decline" variant="danger" confirm={`Decline ${m.name}?`} doneLabel="Declined" /></div>}</td>
-              </tr>
-            ))}
-          </Table>
-        )}
-      </Panel>
+      <PageHeader eyebrow="Membership & finance" title="Applications">
+        Open an application to check the applicant&apos;s details and proof of payment, then approve. Approval activates the member and emails their certificate and ID card.
+      </PageHeader>
+      {pending.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-muted">No applications are waiting.</div>
+      ) : (
+        <ul className="grid gap-3">
+          {pending.map((m) => {
+            const a = (m.application ?? {}) as Record<string, unknown>;
+            const paid = typeof a.amountPaid === "number" ? a.amountPaid : null;
+            const fee = FEES[m.category].registration;
+            const proof = typeof a.paymentProof === "string" && a.paymentProof;
+            return (
+              <li key={m.id}>
+                <Link href={`/admin/applications/${m.id}`} className="group flex items-center gap-4 rounded-2xl border border-line/80 bg-white p-4 shadow-[0_1px_2px_rgba(11,31,51,.04)] transition hover:-translate-y-0.5 hover:border-blue/40 hover:shadow-md sm:p-5">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-deep/[.07] text-[15px] font-semibold text-deep">{m.name.split(/\s+/).filter((w) => !/^dr\.?$/i.test(w)).slice(0, 2).map((w) => w[0]).join("").toUpperCase()}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="truncate text-[15.5px] font-semibold text-ink group-hover:text-blue">{m.name}</span>
+                      <Badge tone="blue">{FEES[m.category].label}</Badge>
+                    </div>
+                    <div className="mt-1 truncate text-[13px] text-muted">{[m.cadre, m.facility, m.region].filter(Boolean).join(" · ")}</div>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px]">
+                      <span className="text-muted">Applied {fmtDate(m.joinedAt)}</span>
+                      {paid === null ? <span className="inline-flex items-center gap-1 text-muted"><TriangleAlert className="size-3.5" />No payment amount</span>
+                        : <span className={`inline-flex items-center gap-1 font-medium ${paid < fee ? "text-amber-700" : "text-emerald-700"}`}>{paid < fee ? <TriangleAlert className="size-3.5" /> : <FileCheck2 className="size-3.5" />}Paid {fmtTZS(paid)} of {fmtTZS(fee)}</span>}
+                      {proof && <span className="text-muted">Proof attached</span>}
+                    </div>
+                  </div>
+                  <span className="hidden items-center gap-1 text-[13px] font-semibold text-blue sm:inline-flex">Review <ChevronRight className="size-4 transition group-hover:translate-x-0.5" /></span>
+                  <ChevronRight className="size-5 shrink-0 text-muted sm:hidden" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </>
   );
 }

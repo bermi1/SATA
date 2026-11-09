@@ -20,7 +20,7 @@ export function DashShell({ title, subtitle, nav, user, bottomTabs, children }: 
           <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white shadow-sm"><Logo size={34} /></span>
           <span className="min-w-0"><span className="block text-[15px] font-semibold leading-tight">{title}</span><span className="block truncate text-[11.5px] text-white/55">{subtitle}</span></span>
         </Link>
-        <div className="dash-scroll flex-1 overflow-y-auto px-3 pb-4"><SideLinks items={nav} /></div>
+        <div className="dash-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-4"><SideLinks items={nav} collapsible={bottomTabs === "admin"} /></div>
         <div className="m-3 rounded-xl bg-white/[.07] p-3">
           <div className="flex items-center gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sky-300/20 text-[13px] font-semibold text-sky-200">{initials(user.name)}</span>
