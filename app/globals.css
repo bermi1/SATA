@@ -34,6 +34,14 @@ body {
 
 h1, h2, h3, .font-display { font-family: var(--font-body), system-ui, sans-serif; letter-spacing: -0.015em; }
 
+/* ── Dashboards: one calm type system for the portal and every committee console ── */
+.dash { font-family: var(--font-ui), system-ui, sans-serif; font-feature-settings: "cv11", "ss01"; letter-spacing: -0.005em; }
+.dash h1, .dash h2, .dash h3, .dash .font-display { font-family: var(--font-ui), system-ui, sans-serif; letter-spacing: -0.02em; }
+.dash .font-extrabold { font-weight: 700; }
+.dash h1 { font-weight: 700; }
+.dash .tabular, .dash table { font-variant-numeric: tabular-nums; }
+.dash-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.18) transparent; }
+
 .card-3d { transform-style: preserve-3d; transition: transform .15s ease-out; will-change: transform; }
 .glass { background: rgba(255,255,255,.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .dot-grid { background-image: radial-gradient(rgba(18,123,192,.18) 1px, transparent 1px); background-size: 22px 22px; }

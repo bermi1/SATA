@@ -3,66 +3,33 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import QRCode from "qrcode";
 import { authorizeDoc, categoryLabel, longDate, pngHeaders, verifyUrl } from "@/lib/doc-access";
-import { listOfficers } from "@/lib/store";
+import { listOfficers, listPartners, listPayments } from "@/lib/store";
 
+// Membership certificate: clean, modern A4 landscape (2000 x 1414 PNG).
 const W = 2000;
 const H = 1414;
 const NAVY = "#0a3d66";
+const BLUE = "#127bc0";
+const RED = "#e8141b";
+const INK = "#0b1f33";
+const MUTED = "#5b7185";
+const LINE = "#dbe7f1";
 const GOLD = "#b8923a";
-const GOLD_L = "#d9bd73";
 
-const logo = `data:image/png;base64,${await readFile(join(process.cwd(), "public/brand/logo-360.png"), "base64")}`;
+/** The address printed on the certificate. The QR code always points to the live verification page. */
+const DOMAIN = process.env.CERT_DOMAIN ?? "sata.co.tz";
 
-// Guilloche-style border: interlaced sine waves along each edge plus spirograph rosettes in the corners.
-function wave(x0: number, y0: number, len: number, amp: number, cycles: number, phase: number, vertical: boolean) {
-  const steps = 240;
-  let d = "";
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const a = Math.sin(t * cycles * Math.PI * 2 + phase) * amp;
-    const x = vertical ? x0 + a : x0 + t * len;
-    const y = vertical ? y0 + t * len : y0 + a;
-    d += `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
-  }
-  return d;
-}
+const asData = async (rel: string) => {
+  try {
+    const ext = rel.split(".").pop()?.toLowerCase();
+    const mime = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : ext === "webp" ? "image/webp" : "image/png";
+    return `data:${mime};base64,${await readFile(join(process.cwd(), "public", rel.replace(/^\//, "")), "base64")}`;
+  } catch { return null; }
+};
+const logo = (await asData("brand/logo-360.png"))!;
 
-function rosette(cx: number, cy: number, r: number, color: string) {
-  let out = "";
-  for (let i = 0; i < 18; i++) out += `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r * 0.38}" transform="rotate(${i * 10} ${cx} ${cy})" fill="none" stroke="${color}" stroke-width="1.2" opacity="0.8"/>`;
-  out += `<circle cx="${cx}" cy="${cy}" r="${r * 0.2}" fill="none" stroke="${GOLD}" stroke-width="2"/>`;
-  return out;
-}
-
-function backgroundSvg() {
-  const m = 46; // outer margin
-  const band = 58; // guilloche band thickness
-  const x1 = m, y1 = m, x2 = W - m, y2 = H - m;
-  let lines = "";
-  const colors = [NAVY, GOLD, "#127bc0", GOLD_L];
-  for (let k = 0; k < 4; k++) {
-    const ph = (k * Math.PI) / 2;
-    const amp = band / 2 - 8;
-    const cy = band / 2;
-    lines += `<path d="${wave(x1, y1 + cy, x2 - x1, amp, 46, ph, false)}" stroke="${colors[k]}" fill="none" stroke-width="1.4" opacity="0.75"/>`;
-    lines += `<path d="${wave(x1, y2 - cy, x2 - x1, amp, 46, ph + 1, false)}" stroke="${colors[k]}" fill="none" stroke-width="1.4" opacity="0.75"/>`;
-    lines += `<path d="${wave(x1 + cy, y1, y2 - y1, amp, 32, ph, true)}" stroke="${colors[k]}" fill="none" stroke-width="1.4" opacity="0.75"/>`;
-    lines += `<path d="${wave(x2 - cy, y1, y2 - y1, amp, 32, ph + 1, true)}" stroke="${colors[k]}" fill="none" stroke-width="1.4" opacity="0.75"/>`;
-  }
-  // Soft medallion behind the text.
-  let medal = "";
-  for (let i = 0; i < 36; i++) medal += `<ellipse cx="${W / 2}" cy="${H / 2}" rx="520" ry="190" transform="rotate(${i * 5} ${W / 2} ${H / 2})" fill="none" stroke="${NAVY}" stroke-width="1" opacity="0.045"/>`;
-  const frame = (inset: number, w: number, c: string) => `<rect x="${x1 + inset}" y="${y1 + inset}" width="${x2 - x1 - inset * 2}" height="${y2 - y1 - inset * 2}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-    <rect width="${W}" height="${H}" fill="#fffdf8"/>
-    ${medal}
-    ${frame(0, 6, NAVY)}${frame(8, 1.5, GOLD)}${lines}${frame(band, 1.5, GOLD)}${frame(band + 8, 5, NAVY)}
-    ${rosette(x1 + band / 2 + 2, y1 + band / 2 + 2, 62, GOLD)}${rosette(x2 - band / 2 - 2, y1 + band / 2 + 2, 62, GOLD)}
-    ${rosette(x1 + band / 2 + 2, y2 - band / 2 - 2, 62, GOLD)}${rosette(x2 - band / 2 - 2, y2 - band / 2 - 2, 62, GOLD)}
-  </svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-}
-const bg = backgroundSvg();
+// Soft concentric "vigilance" rings in the corner: the only ornament.
+const rings = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900">${Array.from({ length: 14 }, (_, i) => `<circle cx="900" cy="0" r="${120 + i * 52}" fill="none" stroke="${BLUE}" stroke-width="1.4" opacity="${0.16 - i * 0.01}"/>`).join("")}</svg>`).toString("base64")}`;
 
 export async function GET(req: Request, { params }: { params: Promise<{ memberNo: string }> }) {
   const { memberNo } = await params;
@@ -70,63 +37,99 @@ export async function GET(req: Request, { params }: { params: Promise<{ memberNo
   if ("response" in auth) return auth.response;
   const m = auth.member;
 
-  const officers = await listOfficers();
-  const president = officers.find((o) => /^president$/i.test(o.title.trim()))?.name ?? "";
-  const secretary = officers.find((o) => /^(general secretary|secretary general)$/i.test(o.title.trim()))?.name ?? "";
-  const url = verifyUrl(m.memberNo);
-  const qr = await QRCode.toDataURL(url, { margin: 0, width: 220, color: { dark: NAVY, light: "#ffffff" } });
-  const admitted = longDate((m.application?.approvedAt as string | undefined) ?? m.joinedAt);
-  const valid = m.category === "honorary" && !m.paidThrough ? "Lifetime" : longDate(m.paidThrough, "-");
-  const nameSize = m.name.length > 34 ? 84 : m.name.length > 26 ? 100 : 118;
+  const [officers, partners, payments] = await Promise.all([listOfficers(), listPartners(), listPayments()]);
+  const officer = (re: RegExp) => officers.find((o) => re.test(o.title.trim()));
+  const president = officer(/^president$/i);
+  const secretary = officer(/^(secretary general|general secretary)$/i);
 
-  const sig = (name: string, role: string) => (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 420 }}>
-      <div style={{ display: "flex", height: 50, fontSize: 30, color: NAVY, fontWeight: 600 }}>{name}</div>
-      <div style={{ display: "flex", width: 380, height: 2, background: NAVY }} />
-      <div style={{ display: "flex", marginTop: 10, fontSize: 24, letterSpacing: 6, color: GOLD, fontWeight: 700, textTransform: "uppercase" }}>{role}</div>
+  // Membership period: from the latest subscription/registration payment (or approval) to the paid-through date.
+  const paid = payments.filter((p) => p.memberId === m.id && (p.purpose === "subscription" || p.purpose === "registration")).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  const start = paid?.createdAt ?? (m.application?.approvedAt as string | undefined) ?? m.joinedAt;
+  const lifetime = !m.paidThrough;
+  const from = longDate(start);
+  const to = lifetime ? "Lifetime" : longDate(m.paidThrough);
+  const progress = lifetime ? 1 : Math.min(1, Math.max(0.04, (Date.now() - new Date(start).getTime()) / (new Date(m.paidThrough!).getTime() - new Date(start).getTime() || 1)));
+
+  const url = verifyUrl(m.memberNo);
+  const qr = await QRCode.toDataURL(url, { margin: 0, width: 260, color: { dark: NAVY, light: "#ffffff" } });
+  const cat = categoryLabel(m);
+  const article = /^[aeiou]/i.test(cat) ? "an" : "a";
+  const nameSize = m.name.length > 30 ? 92 : m.name.length > 22 ? 108 : 124;
+  const logos = (await Promise.all(partners.slice(0, 6).map(async (p) => (p.logo?.startsWith("/") && !p.logo.startsWith("/api/") ? { name: p.name, src: await asData(p.logo) } : null)))).filter((x): x is { name: string; src: string } => !!x?.src);
+
+  const label = (t: string) => <div style={{ display: "flex", fontSize: 21, letterSpacing: 4, fontWeight: 700, color: MUTED, textTransform: "uppercase" }}>{t}</div>;
+  const sig = (name: string | undefined, role: string) => (
+    <div style={{ display: "flex", flexDirection: "column", width: 440 }}>
+      <div style={{ display: "flex", height: 44, alignItems: "flex-end", fontSize: 30, fontWeight: 600, color: INK }}>{name ?? ""}</div>
+      <div style={{ display: "flex", height: 2, background: INK, marginTop: 10, opacity: 0.7 }} />
+      <div style={{ display: "flex", marginTop: 10, fontSize: 22, letterSpacing: 3, fontWeight: 700, color: BLUE, textTransform: "uppercase" }}>{role}</div>
     </div>
   );
 
   return new ImageResponse(
     (
-      <div style={{ width: W, height: H, display: "flex", position: "relative", fontFamily: "Geist, sans-serif" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={bg} width={W} height={H} alt="" style={{ position: "absolute", left: 0, top: 0 }} />
-        <div style={{ position: "absolute", left: 150, right: 150, top: 150, bottom: 140, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logo} width={150} height={150} alt="" />
-          <div style={{ display: "flex", marginTop: 18, fontSize: 30, letterSpacing: 9, color: NAVY, fontWeight: 700, textTransform: "uppercase" }}>Society of Anaesthesiologists of Tanzania</div>
-          <div style={{ display: "flex", alignItems: "center", marginTop: 26 }}>
-            <div style={{ display: "flex", width: 160, height: 2, background: GOLD }} />
-            <div style={{ display: "flex", width: 14, height: 14, background: GOLD, transform: "rotate(45deg)", margin: "0 18px" }} />
-            <div style={{ display: "flex", width: 160, height: 2, background: GOLD }} />
+      <div style={{ width: W, height: H, display: "flex", background: "#ffffff", fontFamily: "Geist, sans-serif", position: "relative" }}>
+        {/* Navy side panel */}
+        <div style={{ width: 470, height: H, display: "flex", flexDirection: "column", alignItems: "center", background: `linear-gradient(180deg, ${NAVY} 0%, #072c4b 100%)`, color: "#ffffff", padding: "110px 50px 90px" }}>
+          <div style={{ width: 240, height: 240, borderRadius: 120, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 20px 50px rgba(0,0,0,.25)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logo} width={186} height={186} alt="" />
           </div>
-          <div style={{ display: "flex", marginTop: 26, fontSize: 104, fontWeight: 800, color: NAVY, letterSpacing: 2 }}>Certificate of Membership</div>
-          <div style={{ display: "flex", marginTop: 34, fontSize: 32, color: "#5b6b7a", letterSpacing: 3 }}>This is to certify that</div>
-          <div style={{ display: "flex", marginTop: 20, fontSize: nameSize, fontWeight: 800, color: NAVY, textAlign: "center" }}>{m.name}</div>
-          <div style={{ display: "flex", width: 900, height: 3, background: GOLD, marginTop: 16 }} />
-          <div style={{ display: "flex", marginTop: 26, fontSize: 36, color: "#33475b" }}>{`has been admitted as ${/^[aeiouh]/i.test(categoryLabel(m)) && !/^h(?!on)/i.test(categoryLabel(m)) ? "an" : "a"} ${categoryLabel(m)} Member of the Society`}</div>
-          <div style={{ display: "flex", marginTop: 40, gap: 90 }}>
-            {[["Member number", m.memberNo], ["Date admitted", admitted], ["Valid through", valid]].map(([l, v]) => (
-              <div key={l} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ display: "flex", fontSize: 22, letterSpacing: 5, color: GOLD, fontWeight: 700, textTransform: "uppercase" }}>{l}</div>
-                <div style={{ display: "flex", marginTop: 8, fontSize: 38, fontWeight: 700, color: NAVY }}>{v}</div>
-              </div>
-            ))}
-          </div>
+          <div style={{ display: "flex", marginTop: 40, fontSize: 64, fontWeight: 800, letterSpacing: 6 }}>SATA</div>
+          <div style={{ display: "flex", marginTop: 6, fontSize: 22, letterSpacing: 4, opacity: 0.7 }}>EST. 2002 · TANZANIA</div>
+          <div style={{ display: "flex", width: 60, height: 4, background: RED, marginTop: 34, borderRadius: 2 }} />
           <div style={{ display: "flex", flex: 1 }} />
-          <div style={{ display: "flex", width: "100%", alignItems: "flex-end", justifyContent: "space-between" }}>
-            {sig(president, "President")}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <div style={{ display: "flex", padding: 10, background: "#ffffff", border: `2px solid ${GOLD}` }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={qr} width={150} height={150} alt="" />
-              </div>
-              <div style={{ display: "flex", marginTop: 10, fontSize: 20, color: "#5b6b7a" }}>{`Verify at ${url.replace(/^https?:\/\//, "")}`}</div>
+          <div style={{ display: "flex", fontSize: 20, letterSpacing: 4, opacity: 0.65 }}>MEMBER NUMBER</div>
+          <div style={{ display: "flex", marginTop: 8, fontSize: 52, fontWeight: 700, letterSpacing: 3 }}>{m.memberNo}</div>
+          <div style={{ display: "flex", marginTop: 44, padding: 16, background: "#ffffff", borderRadius: 20 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qr} width={200} height={200} alt="" />
+          </div>
+          <div style={{ display: "flex", marginTop: 16, fontSize: 20, opacity: 0.75 }}>Scan to verify membership</div>
+        </div>
+
+        {/* Content */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={rings} width={900} height={900} alt="" style={{ position: "absolute", right: 0, top: 0 }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "110px 120px 70px 110px", position: "relative" }}>
+          <div style={{ display: "flex", fontSize: 24, letterSpacing: 7, fontWeight: 700, color: BLUE, textTransform: "uppercase" }}>Society of Anaesthesiologists of Tanzania</div>
+          <div style={{ display: "flex", marginTop: 22, fontSize: 92, fontWeight: 700, color: NAVY, letterSpacing: -2, lineHeight: 1 }}>Certificate of Membership</div>
+          <div style={{ display: "flex", marginTop: 56, fontSize: 30, color: MUTED }}>This certifies that</div>
+          <div style={{ display: "flex", marginTop: 12, fontSize: nameSize, fontWeight: 700, color: INK, letterSpacing: -2, lineHeight: 1.05 }}>{m.name}</div>
+          <div style={{ display: "flex", marginTop: 26, fontSize: 32, lineHeight: 1.45, color: "#33475b", maxWidth: 1240 }}>
+            {`is ${article} ${cat} Member in good standing of the Society of Anaesthesiologists of Tanzania, committed to safe anaesthesia and critical care for every patient.`}
+          </div>
+
+          {/* Membership period */}
+          <div style={{ display: "flex", flexDirection: "column", marginTop: 54, padding: "30px 36px", borderRadius: 24, background: "#f3f8fc", border: `1px solid ${LINE}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>{label("Membership from")}<div style={{ display: "flex", marginTop: 8, fontSize: 38, fontWeight: 700, color: NAVY }}>{from}</div></div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{label("Category")}<div style={{ display: "flex", marginTop: 8, fontSize: 38, fontWeight: 700, color: NAVY }}>{cat}</div></div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>{label("Valid until")}<div style={{ display: "flex", marginTop: 8, fontSize: 38, fontWeight: 700, color: NAVY }}>{to}</div></div>
             </div>
-            {sig(secretary, "General Secretary")}
+            <div style={{ display: "flex", position: "relative", height: 14, marginTop: 24, borderRadius: 7, background: "#dbe7f1" }}>
+              <div style={{ display: "flex", width: `${Math.round(progress * 100)}%`, height: 14, borderRadius: 7, background: `linear-gradient(90deg, ${NAVY}, ${BLUE})` }} />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flex: 1 }} />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            {sig(president?.name, "President")}
+            {sig(secretary?.name, "Secretary General")}
+          </div>
+
+          {/* Partners + verification */}
+          <div style={{ display: "flex", alignItems: "center", marginTop: 48, paddingTop: 26, borderTop: `1px solid ${LINE}` }}>
+            <div style={{ display: "flex", fontSize: 18, letterSpacing: 4, fontWeight: 700, color: MUTED, marginRight: 26 }}>SUPPORTED BY</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 30, flex: 1 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {logos.map((l) => <img key={l.name} src={l.src} alt="" height={46} style={{ height: 46, maxWidth: 150, objectFit: "contain" }} />)}
+            </div>
+            <div style={{ display: "flex", fontSize: 20, color: MUTED }}>{`Verify at ${DOMAIN}/verify · ${m.memberNo}`}</div>
           </div>
         </div>
+        <div style={{ position: "absolute", left: 470, right: 0, bottom: 0, height: 10, display: "flex", background: `linear-gradient(90deg, ${NAVY}, ${BLUE} 70%, ${RED})` }} />
+        <div style={{ position: "absolute", left: 470, top: 0, bottom: 0, width: 6, display: "flex", background: GOLD, opacity: 0.85 }} />
       </div>
     ),
     { width: W, height: H, headers: pngHeaders(m.memberNo, "certificate", req) },

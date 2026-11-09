@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Sans, Inter } from "next/font/google";
 import "./globals.css";
 
 const body = IBM_Plex_Sans({ variable: "--font-body", subsets: ["latin"], weight: ["400", "500", "600", "700"], display: "swap" });
+// Dashboards (member portal and committee consoles) use Inter: a calm, highly legible interface face.
+const ui = Inter({ variable: "--font-ui", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://sata.co.tz"),
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${body.variable} h-full`}>
+    <html lang="en" className={`${body.variable} ${ui.variable} h-full`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
