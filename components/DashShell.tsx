@@ -54,7 +54,7 @@ export function DashShell({ title, subtitle, nav, user, bottomTabs, children }: 
         {/* Admin consoles on phones: the section list stays reachable through the "More" sheet; portal uses bottom tabs. */}
         <main className={`mx-auto w-full max-w-[1280px] px-4 py-5 sm:px-6 sm:py-7 lg:px-10 lg:py-9 ${bottomTabs ? "pb-28 lg:pb-9" : ""}`}>{children}</main>
       </div>
-      <FeedbackButton prominent={user.demo} />
+      {user.demo && <FeedbackButton prominent />}
       {bottomTabs === "admin" ? <AdminTabs items={nav} /> : bottomTabs ? <BottomTabs items={nav} /> : null}
     </div>
   );

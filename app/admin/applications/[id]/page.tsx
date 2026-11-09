@@ -144,7 +144,7 @@ export default async function ApplicationDetail({ params }: { params: Promise<{ 
 
       {/* Decision bar */}
       {writable && m.status === "pending" && (
-        <div className="fixed inset-x-0 bottom-[64px] z-30 border-t border-line bg-white/95 px-4 py-3 backdrop-blur lg:sticky lg:bottom-0 lg:mt-6 lg:rounded-2xl lg:border lg:px-6 lg:shadow-lg">
+        <div className="fixed inset-x-0 bottom-[64px] z-30 border-t border-line bg-white/95 px-4 py-3 backdrop-blur lg:sticky lg:bottom-0 lg:mt-6 lg:rounded-2xl lg:border lg:px-6 lg:pr-40 lg:shadow-lg">
           <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3">
             <div className="hidden text-[13.5px] text-muted sm:block">Approving activates <strong className="font-semibold text-ink">{m.name}</strong> and emails their certificate and ID card.</div>
             <div className="flex w-full gap-2 sm:w-auto">
