@@ -34,7 +34,8 @@ const renewalDate = () => {
 };
 
 // ───── reads
-export const listMembers = () => R().list<Member>("members", undefined, { orderBy: "memberNo" });
+/** Real members only: view-only demo accounts are never listed, counted or messaged. */
+export const listMembers = async () => (await R().list<Member>("members", undefined, { orderBy: "memberNo" })).filter((m) => !m.demo);
 export const getMember = (id: string) => R().get<Member>("members", id);
 export const getMemberByNo = async (no: string) => (await R().list<Member>("members", { memberNo: no.trim().toUpperCase() }))[0] ?? null;
 export const getMemberByEmail = async (e: string) => (await R().list<Member>("members", { email: e.trim().toLowerCase() }))[0] ?? null;

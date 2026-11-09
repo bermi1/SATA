@@ -15,7 +15,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/admin": LayoutDashboard, "/admin/applications": ClipboardCheck, "/admin/members": Users, "/admin/payments": Banknote, "/admin/events": CalendarCheck,
   "/admin/calendar": CalendarDays, "/admin/messaging": MessageSquareText, "/admin/subscribers": Mail, "/admin/newsletter": Send, "/admin/comms": Megaphone,
   "/admin/library": BookOpen, "/admin/site": Globe, "/admin/gallery": Images, "/admin/departments": Network, "/admin/reports": BarChart3, "/admin/audit": FileClock,
-  "/admin/team": UserCog,
+  "/admin/team": UserCog, "/admin/feedback": MessageSquareText,
 };
 export const iconFor = (href: string): LucideIcon => ICONS[href.replace(/[?#].*$/, "")] ?? (href.startsWith("/admin") ? ShieldCheck : House);
 

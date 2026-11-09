@@ -98,6 +98,7 @@ export function buildSeedTables(mode: "demo" | "production"): Rows {
     settings: [{ id: "site", ...structuredClone(SETTINGS_SEED) }],
     login_codes: [],
     news_feed: [],
+    feedback: [],
     newsletters: [],
   };
 }

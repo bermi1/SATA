@@ -9,7 +9,7 @@ export default async function PortalLayout({ children }: { children: React.React
       title="My SATA"
       subtitle="Member portal"
       bottomTabs
-      user={{ name: me.name, role: me.role === "member" ? me.cadre : ROLE_LABEL[me.role] }}
+      user={{ name: me.name, role: me.role === "member" ? me.cadre : ROLE_LABEL[me.role], demo: !!me.demo }}
       nav={[
         { href: "/portal", label: "Dashboard" },
         { href: "/portal/events", label: "Events & attendance", group: "Membership" },

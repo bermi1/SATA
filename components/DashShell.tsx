@@ -4,13 +4,14 @@ import { Logo } from "./Logo";
 import { LogoutButton } from "./LogoutButton";
 import { AdminTabs } from "./AdminTabs";
 import { BottomTabs, SideLinks } from "./SideLinks";
+import { FeedbackButton } from "./FeedbackButton";
 
 export interface NavItem { href: string; label: string; badge?: number; short?: string; group?: string }
 
 const initials = (n: string) => n.split(/\s+/).filter((w) => !/^(dr|prof|mr|mrs|ms|amb)\.?$/i.test(w)).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "S";
 
 // Shared frame for the member portal and every committee console: navy sidebar on desktop, compact top bar + bottom tabs on phones.
-export function DashShell({ title, subtitle, nav, user, bottomTabs, children }: { title: string; subtitle: string; nav: NavItem[]; user: { name: string; role: string }; bottomTabs?: boolean | "admin"; children: React.ReactNode }) {
+export function DashShell({ title, subtitle, nav, user, bottomTabs, children }: { title: string; subtitle: string; nav: NavItem[]; user: { name: string; role: string; demo?: boolean }; bottomTabs?: boolean | "admin"; children: React.ReactNode }) {
   return (
     <div className="dash min-h-screen bg-[#f5f8fb] lg:grid lg:grid-cols-[272px_1fr]">
       {/* Desktop sidebar */}
@@ -44,9 +45,16 @@ export function DashShell({ title, subtitle, nav, user, bottomTabs, children }: 
             <span className="grid size-8 place-items-center rounded-full bg-deep text-[12px] font-semibold text-white">{initials(user.name)}</span>
           </div>
         </header>
+        {user.demo && (
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-amber-50 px-4 py-2 text-center text-[12.5px] text-amber-900 ring-1 ring-amber-200">
+            <span><strong className="font-semibold">Demo account, view only.</strong> Look around freely: nothing you do is saved or sent.</span>
+            <Link href="/demo" className="font-semibold underline">Switch account</Link>
+          </div>
+        )}
         {/* Admin consoles on phones: the section list stays reachable through the "More" sheet; portal uses bottom tabs. */}
         <main className={`mx-auto w-full max-w-[1280px] px-4 py-5 sm:px-6 sm:py-7 lg:px-10 lg:py-9 ${bottomTabs ? "pb-28 lg:pb-9" : ""}`}>{children}</main>
       </div>
+      <FeedbackButton prominent={user.demo} />
       {bottomTabs === "admin" ? <AdminTabs items={nav} /> : bottomTabs ? <BottomTabs items={nav} /> : null}
     </div>
   );

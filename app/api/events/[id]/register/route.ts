@@ -10,6 +10,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const me = await getSession();
   let res;
+  if (me?.demo) return Response.json({ error: "This is a view-only demo account, so event registration is switched off." }, { status: 403 });
   if (me) {
     if (me.status === "pending") return Response.json({ error: "Your application is still being reviewed. You can register once it is approved." }, { status: 403 });
     if (!isInGoodStanding(me)) return Response.json({ error: "Renew your membership to register as a member" }, { status: 402 });

@@ -27,6 +27,8 @@ export interface Member {
   lastReminderAt?: string | null;
   /** Extra answers from the membership application form (gender, nationality, payment proof, ...). */
   application?: Record<string, unknown> | null;
+  /** View-only reviewer account (see /demo). Never counted, listed or messaged. */
+  demo?: boolean;
 }
 
 export type EventType = "conference" | "agm" | "workshop" | "webinar" | "meeting" | "marathon" | "training";
@@ -311,3 +313,6 @@ export interface Newsletter {
   sentCount: number;
   createdBy: string;
 }
+
+/** A comment left by a reviewer or admin from the feedback button. */
+export interface Feedback { id: string; page: string; message: string; name: string; role: string; memberId: string | null; status: "new" | "done"; createdAt: string }

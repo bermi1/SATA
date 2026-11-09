@@ -68,6 +68,7 @@ export async function guard(area?: Area, write = true): Promise<Member | Respons
   if (write && !(await sameOrigin())) return Response.json({ error: "Forbidden" }, { status: 403 });
   const m = await getSession();
   if (!m) return Response.json({ error: "Sign in required" }, { status: 401 });
+  if (write && m.demo) return Response.json({ error: "This is a view-only demo account: you can look around, but changes are switched off. Use the Feedback button to comment." }, { status: 403 });
   if (area && !(write ? canWrite(m.role, area) : can(m.role, area))) return Response.json({ error: "You do not have permission for this action" }, { status: 403 });
   return m;
 }

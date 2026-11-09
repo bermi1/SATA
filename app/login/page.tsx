@@ -36,6 +36,11 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           <h2 className="text-3xl font-extrabold text-deep">Sign in</h2>
           <p className="mt-2 text-sm text-muted">Enter the email on your SATA membership and we will send you a one-time code.</p>
           <div className="mt-6"><LoginForm next={next} /></div>
+          {process.env.DEMO_LOGIN === "on" && (
+            <a href="/demo" className="mt-5 flex items-center justify-between rounded-2xl border border-dashed border-blue/40 bg-blue/[.04] px-4 py-3 text-sm text-deep transition hover:bg-blue/[.08]">
+              <span><span className="font-semibold">Just looking?</span> Try a view-only demo account</span><span aria-hidden>→</span>
+            </a>
+          )}
           {demo && <div className="mt-10 rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-5">
             <div className="text-xs font-bold uppercase tracking-widest text-amber-800">Development only · sample data</div>
             <p className="mt-1 text-xs text-amber-900">Pick a role to explore. This panel does not exist in production, where every sign-in needs an emailed code.</p>

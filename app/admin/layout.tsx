@@ -37,12 +37,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/reports", label: "Reports", area: "reports", group: "Society" },
     { href: "/admin/audit", label: "Audit log", area: "audit", group: "Society" },
     { href: "/admin/team", label: "Admin accounts", area: "admins", group: "Society" },
+    { href: "/admin/feedback", label: "Reviewer feedback", area: "admins", group: "Society" },
   ];
   const nav: NavItem[] = all
     .filter((n) => n.area === null || (Array.isArray(n.area) ? n.area.some(has) : has(n.area)))
     .map((n) => ({ href: n.href, label: n.label, badge: n.badge, group: n.group }));
   return (
-    <DashShell title="SATA Admin" subtitle={ROLE_LABEL[me.role]} bottomTabs="admin" user={{ name: me.name, role: ROLE_LABEL[me.role] }} nav={[...nav, { href: "/portal", label: "My member portal", group: "You" }]}>
+    <DashShell title="SATA Admin" subtitle={ROLE_LABEL[me.role]} bottomTabs="admin" user={{ name: me.name, role: ROLE_LABEL[me.role], demo: !!me.demo }} nav={[...nav, { href: "/portal", label: "My member portal", group: "You" }]}>
       {children}
     </DashShell>
   );

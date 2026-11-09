@@ -1,7 +1,7 @@
 export const TABLES = [
   "members", "departments", "officers", "events", "registrations", "attendance", "payments", "announcements", "enquiries",
   "resources", "gallery", "tickets", "subscribers", "notifications", "messages", "audit", "team", "partners", "calendar",
-  "settings", "login_codes", "news_feed", "newsletters",
+  "settings", "login_codes", "news_feed", "feedback", "newsletters",
 ] as const;
 export type Table = (typeof TABLES)[number];
 
