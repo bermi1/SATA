@@ -30,6 +30,8 @@ const schema = z.object({
   memberFee: num,
   guestFee: num,
   minutesRequired: num,
+  popup: z.preprocess((v) => v === "on" || v === "true", z.boolean()).default(false),
+  popupUntil: z.string().optional(),
 });
 
 export async function parseEventForm(fd: FormData): Promise<{ data: Omit<SataEvent, "id" | "slug"> & { image?: string } } | { error: string }> {
@@ -42,6 +44,9 @@ export async function parseEventForm(fd: FormData): Promise<{ data: Omit<SataEve
   const endsAt = parseEat(d.endsAt);
   if (isNaN(+startsAt) || isNaN(+endsAt)) return { error: "Enter valid start and end times" };
   if (endsAt < startsAt) return { error: "The event must end after it starts" };
+
+  const popupUntil = d.popup && d.popupUntil ? parseEat(d.popupUntil.length === 10 ? `${d.popupUntil}T23:59` : d.popupUntil) : null;
+  if (popupUntil && isNaN(+popupUntil)) return { error: "Enter a valid pop-up end date" };
 
   let image: string | undefined;
   const poster = fd.get("poster");
@@ -57,6 +62,7 @@ export async function parseEventForm(fd: FormData): Promise<{ data: Omit<SataEve
       capacity: d.capacity && d.capacity > 0 ? d.capacity : null, cpdPoints: d.cpdPoints ?? 0,
       fees: { full: d.memberFee ?? 0, associate: d.memberFee ?? 0, guest: d.guestFee ?? 0 },
       minutesRequired: d.minutesRequired && d.minutesRequired > 0 ? d.minutesRequired : undefined, image,
+      popup: d.popup, popupUntil: popupUntil ? popupUntil.toISOString() : null,
     },
   };
 }

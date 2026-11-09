@@ -20,7 +20,7 @@ export default async function EditEvent({ params }: { params: Promise<{ id: stri
         <EventForm values={{
           id: e.id, title: e.title, type: e.type, mode: e.mode, status: e.status ?? "published", startsAt: toEatInput(e.startsAt), endsAt: toEatInput(e.endsAt), venue: e.venue,
           link: e.link, externalUrl: e.externalUrl, summary: e.summary, theme: e.theme, capacity: e.capacity, cpdPoints: e.cpdPoints, memberFee: e.fees.full ?? 0,
-          guestFee: e.fees.guest ?? 0, minutesRequired: e.minutesRequired, image: e.image,
+          guestFee: e.fees.guest ?? 0, minutesRequired: e.minutesRequired, image: e.image, popup: !!e.popup, popupUntil: e.popupUntil ? toEatInput(e.popupUntil).slice(0, 10) : undefined,
         }} />
       </Panel>
     </>

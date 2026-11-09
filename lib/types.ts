@@ -54,6 +54,9 @@ export interface SataEvent {
   externalUrl?: string; // registration handled on another official site
   image?: string; // poster
   status?: "draft" | "published" | "cancelled";
+  /** Promote as a pop-up when visitors open the website (until popupUntil, or until the event starts). */
+  popup?: boolean;
+  popupUntil?: string | null;
 }
 
 export interface Registration {

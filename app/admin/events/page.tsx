@@ -30,7 +30,7 @@ export default async function AdminEvents() {
                 {e.image && <Image src={e.image} alt="" fill sizes="144px" className="object-cover" unoptimized={e.image.startsWith("/api/")} />}
               </div>
               <div className="min-w-0 flex-1 p-4 sm:p-5">
-                <div className="flex flex-wrap items-center gap-1.5"><Badge>{EVENT_LABEL[e.type]}</Badge><Badge tone={TONE[status]}>{status}</Badge>{e.sample && <Badge tone="amber">Sample</Badge>}</div>
+                <div className="flex flex-wrap items-center gap-1.5"><Badge>{EVENT_LABEL[e.type]}</Badge><Badge tone={TONE[status]}>{status}</Badge>{e.sample && <Badge tone="amber">Sample</Badge>}{e.popup && <Badge tone="red">Website pop-up</Badge>}</div>
                 <Link href={`/admin/events/${e.id}`} className="mt-2 block font-display text-lg font-bold leading-snug text-deep hover:text-blue">{e.title}</Link>
                 <p className="mt-1 text-xs text-muted">{fmtRange(e)} · {e.venue}</p>
                 <div className="mt-3 flex gap-5 text-sm"><span><b className="text-deep">{reg}</b> <span className="text-muted">registered{e.capacity ? ` / ${e.capacity}` : ""}</span></span><span><b className="text-deep">{att}</b> <span className="text-muted">attended</span></span></div>

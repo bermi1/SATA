@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  Banknote, BarChart3, BookOpen, CalendarCheck, CalendarDays, CircleUser, ClipboardCheck, FileClock, Globe, House, Images, LayoutDashboard, LifeBuoy, Mail, Megaphone,
+  Banknote, BarChart3, BookOpen, ChevronDown, CalendarCheck, CalendarDays, CircleUser, ClipboardCheck, FileClock, Globe, House, Images, LayoutDashboard, LifeBuoy, Mail, Megaphone,
   MessageSquareText, Network, Send, ShieldCheck, UserCog, Users, type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { NavItem } from "./DashShell";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -20,7 +21,9 @@ export const iconFor = (href: string): LucideIcon => ICONS[href.replace(/[?#].*$
 
 const isActive = (href: string, path: string) => href === path || (href.split("/").length > 2 && path.startsWith(href));
 
-// Grouped, icon-led navigation on the navy sidebar (desktop).
+const STORE = "sata-nav-open";
+
+// Grouped, icon-led navigation on the navy sidebar (desktop). Groups collapse; the one holding the current page is always open.
 export function SideLinks({ items }: { items: NavItem[] }) {
   const path = usePathname();
   const groups: { name: string; items: NavItem[] }[] = [];
@@ -29,12 +32,31 @@ export function SideLinks({ items }: { items: NavItem[] }) {
     const last = groups[groups.length - 1];
     if (last && last.name === g) last.items.push(i); else groups.push({ name: g, items: [i] });
   }
+  const current = groups.find((g) => g.items.some((i) => isActive(i.href, path)))?.name;
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restore the person's open/closed groups after hydration
+    try { setOpen(JSON.parse(localStorage.getItem(STORE) ?? "{}")); } catch { /* storage blocked */ }
+  }, []);
+  const isOpen = (name: string) => !name || name === current || (open[name] ?? false);
+  const toggle = (name: string) => setOpen((o) => {
+    const next = { ...o, [name]: !isOpen(name) };
+    try { localStorage.setItem(STORE, JSON.stringify(next)); } catch { /* ignore */ }
+    return next;
+  });
+
   return (
-    <nav className="mt-6 grid gap-5" aria-label="Dashboard">
+    <nav className="mt-6 grid gap-1" aria-label="Dashboard">
       {groups.map((g) => (
-        <div key={g.name || "main"}>
-          {g.name && <div className="mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/40">{g.name}</div>}
-          <ul className="grid gap-0.5">
+        <div key={g.name || "main"} className={g.name ? "" : "mb-3"}>
+          {g.name && (
+            <button onClick={() => toggle(g.name)} aria-expanded={isOpen(g.name)}
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/45 transition hover:bg-white/[.04] hover:text-white/75">
+              <span className="flex items-center gap-2">{g.name}{!isOpen(g.name) && g.items.some((i) => i.badge) && <span className="size-1.5 rounded-full bg-vigil" />}</span>
+              <ChevronDown className={`size-3.5 transition-transform ${isOpen(g.name) ? "" : "-rotate-90"}`} />
+            </button>
+          )}
+          <ul className={`grid gap-0.5 overflow-hidden transition-all ${isOpen(g.name) ? "max-h-[600px] pb-2 opacity-100" : "max-h-0 opacity-0"}`}>
             {g.items.map((i) => {
               const active = isActive(i.href, path);
               const Icon = iconFor(i.href);

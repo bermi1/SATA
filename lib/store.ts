@@ -44,6 +44,11 @@ export async function listEvents(opts: { includeDrafts?: boolean } = {}) {
   const all = await R().list<SataEvent>("events");
   return all.filter((e) => opts.includeDrafts || (e.status ?? "published") === "published").sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt));
 }
+/** The event currently promoted as a website pop-up (soonest upcoming, published, with popup on). */
+export async function getPopupEvent() {
+  const now = Date.now();
+  return (await listEvents()).find((e) => e.popup && new Date(e.popupUntil ?? e.startsAt).getTime() >= now && new Date(e.endsAt).getTime() >= now) ?? null;
+}
 export async function getEvent(idOrSlug: string) {
   return (await R().get<SataEvent>("events", idOrSlug)) ?? (await R().list<SataEvent>("events", { slug: idOrSlug }))[0] ?? null;
 }

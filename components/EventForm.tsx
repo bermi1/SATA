@@ -7,7 +7,7 @@ export interface EventFormValues {
   id?: string;
   title?: string; type?: string; mode?: string; status?: string; startsAt?: string; endsAt?: string; venue?: string;
   link?: string; externalUrl?: string; summary?: string; theme?: string; capacity?: number | null; cpdPoints?: number;
-  memberFee?: number; guestFee?: number; minutesRequired?: number; image?: string;
+  memberFee?: number; guestFee?: number; minutesRequired?: number; image?: string; popup?: boolean; popupUntil?: string;
 }
 
 const TYPES = [["conference", "Conference"], ["agm", "Conference & AGM"], ["workshop", "Workshop"], ["webinar", "Webinar"], ["meeting", "Meeting"], ["marathon", "Marathon / fun run"], ["training", "Training"]];
@@ -31,6 +31,7 @@ export default function EventForm({ values = {} }: { values?: EventFormValues })
   const [preview, setPreview] = useState<string | null>(values.image ?? null);
   const [mode, setMode] = useState(values.mode ?? "physical");
   const [type, setType] = useState(values.type ?? "conference");
+  const [popup, setPopup] = useState(!!values.popup);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -88,6 +89,14 @@ export default function EventForm({ values = {} }: { values?: EventFormValues })
       <Field label="Guest fee (TZS)" hint="Non-members who register on the website."><input name="guestFee" type="number" min={0} defaultValue={values.guestFee ?? 0} className={box} /></Field>
       {online && <Field label="Minutes online to count" hint="Attendance below this is not credited with CPD." span><input name="minutesRequired" type="number" min={0} defaultValue={values.minutesRequired ?? ""} className={box} /></Field>}
       <Field label="Register on another site (optional)" hint="If registration happens elsewhere, e.g. aaac2027.com." span><input name="externalUrl" type="url" defaultValue={values.externalUrl} className={box} placeholder="https://" /></Field>
+
+      <div className="rounded-2xl border border-blue/20 bg-blue/[.04] p-4 sm:col-span-2">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input type="checkbox" name="popup" defaultChecked={values.popup} onChange={(e) => setPopup(e.target.checked)} className="mt-0.5 size-5 accent-[#127bc0]" />
+          <span><span className="block text-sm font-semibold text-ink">Show as a pop-up on the website</span><span className="mt-0.5 block text-xs text-muted">Visitors see the poster, details and a Register button when they open the site (once a day). The poster above is used, so upload one.</span></span>
+        </label>
+        {popup && <div className="mt-3 sm:max-w-xs"><Field label="Show the pop-up until" hint="Leave blank to show it until the event starts."><input name="popupUntil" type="date" defaultValue={values.popupUntil} className={box} /></Field></div>}
+      </div>
 
       <Field label="Visibility" span>
         <select name="status" defaultValue={values.status ?? "published"} className={box}>
