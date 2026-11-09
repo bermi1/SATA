@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Logo } from "./Logo";
 
 export interface MenuGroup { label: string; href: string; external?: boolean; note?: string; children?: { label: string; href: string }[] }
@@ -22,8 +23,9 @@ export function MobileMenu({ groups, signedIn, home }: { groups: MenuGroup[]; si
         <span className={`absolute h-0.5 w-[18px] rounded bg-deep transition ${open ? "opacity-0" : ""}`} />
         <span className={`absolute h-0.5 w-[18px] rounded bg-deep transition ${open ? "-rotate-45" : "translate-y-1.5"}`} />
       </button>
-      {open && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#06233d] text-white lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+      {/* Portalled to <body>: the sticky header uses backdrop-blur, which would trap a fixed overlay inside the header box. */}
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[60] flex flex-col bg-[#06233d] text-white lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="flex h-16 items-center justify-between px-5">
             <Logo tone="white" size={40} />
             <button aria-label="Close menu" onClick={close} className="grid size-10 place-items-center rounded-full border border-white/25 text-2xl">×</button>
@@ -48,7 +50,8 @@ export function MobileMenu({ groups, signedIn, home }: { groups: MenuGroup[]; si
             <Link href={signedIn ? home : "/membership/apply"} onClick={close} className={`rounded-full bg-white py-4 text-center text-base font-bold text-deep ${signedIn ? "col-span-2" : ""}`}>{signedIn ? "Open my account" : "Join SATA"}</Link>
             {!signedIn && <Link href="/login" onClick={close} className="order-first rounded-full border border-white/30 py-4 text-center text-base font-semibold">Sign in</Link>}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
