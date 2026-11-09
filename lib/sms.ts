@@ -83,7 +83,7 @@ export async function sendEmail(to: string, subject: string, text: string, opts:
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: process.env.EMAIL_FROM ?? "SATA <info@sata.co.tz>", to, subject, text, html: renderEmail(subject, text, opts), reply_to: process.env.EMAIL_REPLY_TO ?? "info@sata.co.tz" }),
+      body: JSON.stringify({ from: process.env.EMAIL_FROM ?? "SATA <info@sata.co.tz>", to, subject, text, html: renderEmail(subject, text, opts), reply_to: process.env.EMAIL_REPLY_TO ?? "info@sata.co.tz", ...(opts.attachments?.length ? { attachments: opts.attachments } : {}) }),
     });
     return { to, ok: res.ok, error: res.ok ? undefined : `HTTP ${res.status}` };
   } catch (e) {

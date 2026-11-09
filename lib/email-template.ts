@@ -17,6 +17,10 @@ export interface EmailOptions {
   /** A large highlighted value, e.g. a sign-in code. */
   code?: string;
   button?: { label: string; href: string };
+  /** Pictures shown in the email body (e.g. the membership certificate and ID card). */
+  images?: { src: string; alt: string; href?: string; width?: number }[];
+  /** Files attached to the email; Resend downloads each from its URL. */
+  attachments?: { filename: string; path: string }[];
   preheader?: string;
 }
 
@@ -34,6 +38,12 @@ export function renderEmail(subject: string, text: string, o: EmailOptions = {})
        </td></tr>`
     : "";
 
+  const images = (o.images ?? []).map((im) => {
+    const w = Math.min(im.width ?? 488, 488);
+    const img = `<img src="${esc(im.src)}" width="${w}" alt="${esc(im.alt)}" style="display:block;width:100%;max-width:${w}px;height:auto;border:0;border-radius:10px;box-shadow:0 6px 18px rgba(11,31,51,.12)">`;
+    return `<tr><td align="center" style="padding:6px 0 18px">${im.href ? `<a href="${esc(im.href)}">${img}</a>` : img}</td></tr>`;
+  }).join("");
+
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(subject)}</title></head>
 <body style="margin:0;padding:0;background:#eef3f8;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
@@ -50,7 +60,7 @@ export function renderEmail(subject: string, text: string, o: EmailOptions = {})
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="padding-bottom:16px;font-size:22px;font-weight:800;line-height:1.3;color:#0b1f33">${esc(o.heading ?? subject)}</td></tr>
         <tr><td>${paragraphs(text)}</td></tr>
-        ${codeBlock}${button}
+        ${codeBlock}${images}${button}
       </table>
     </td></tr>
     <tr><td style="padding:20px 36px 28px;border-top:1px solid #eef3f8">

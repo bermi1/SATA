@@ -105,7 +105,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ memberNo
           <div style={{ display: "flex", marginTop: 34, fontSize: 32, color: "#5b6b7a", letterSpacing: 3 }}>This is to certify that</div>
           <div style={{ display: "flex", marginTop: 20, fontSize: nameSize, fontWeight: 800, color: NAVY, textAlign: "center" }}>{m.name}</div>
           <div style={{ display: "flex", width: 900, height: 3, background: GOLD, marginTop: 16 }} />
-          <div style={{ display: "flex", marginTop: 26, fontSize: 36, color: "#33475b" }}>{`has been admitted as a ${categoryLabel(m)} Member of the Society`}</div>
+          <div style={{ display: "flex", marginTop: 26, fontSize: 36, color: "#33475b" }}>{`has been admitted as ${/^[aeiouh]/i.test(categoryLabel(m)) && !/^h(?!on)/i.test(categoryLabel(m)) ? "an" : "a"} ${categoryLabel(m)} Member of the Society`}</div>
           <div style={{ display: "flex", marginTop: 40, gap: 90 }}>
             {[["Member number", m.memberNo], ["Date admitted", admitted], ["Valid through", valid]].map(([l, v]) => (
               <div key={l} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
