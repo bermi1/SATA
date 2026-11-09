@@ -6,21 +6,20 @@ import type { Member } from "./types";
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 const validText = (m: Member) => (m.paidThrough ? fmt(m.paidThrough) : "lifetime");
 
-const certificate = (m: Member) => ({ src: docLink(m.memberNo, "certificate"), alt: "SATA membership certificate", href: docLink(m.memberNo, "certificate", true) });
 const card = (m: Member) => ({ src: docLink(m.memberNo, "card"), alt: "SATA digital ID card", href: docLink(m.memberNo, "card", true), width: 360 });
 
 /** Welcome email sent when an application is approved: certificate and ID card shown inline and attached. Never throws. */
 export async function sendWelcomeEmail(m: Member) {
   try {
-    const text = `Dear ${m.name},\n\nCongratulations. Your application has been approved and you are now a ${FEES[m.category].label} of the Society of Anaesthesiologists of Tanzania.\n\nMembership number: ${m.memberNo}\nValid through: ${validText(m)}\n\nYour membership certificate and digital ID card are below and attached to this email. Keep the ID card on your phone: anyone can scan its QR code to confirm your membership.\n\nSign in to your member portal to register for events, track your CPD points and manage your membership.\n\nWelcome to SATA.`;
+    const text = `Dear ${m.name},\n\nCongratulations. Your application has been approved and you are now a ${FEES[m.category].label} of the Society of Anaesthesiologists of Tanzania.\n\nMembership number: ${m.memberNo}\nValid through: ${validText(m)}\n\nYour membership certificate (PDF) and digital ID card are attached to this email. Keep the ID card on your phone: anyone can scan its QR code to confirm your membership.\n\nSign in to your member portal to register for events, track your CPD points and manage your membership.\n\nWelcome to SATA.`;
     return await sendEmail(m.email, "Welcome to SATA: your membership is approved", text, {
       heading: "Welcome to SATA",
-      images: [certificate(m), card(m)],
+      images: [card(m)],
       attachments: [
-        { filename: `SATA-certificate-${m.memberNo}.png`, path: docLink(m.memberNo, "certificate") },
+        { filename: `SATA-certificate-${m.memberNo}.pdf`, path: docLink(m.memberNo, "certificate") },
         { filename: `SATA-ID-card-${m.memberNo}.png`, path: docLink(m.memberNo, "card") },
       ],
-      button: { label: "Sign in to your portal", href: `${siteUrl()}/login` },
+      button: { label: "Download your certificate (PDF)", href: docLink(m.memberNo, "certificate", true) },
       preheader: `Your membership number is ${m.memberNo}`,
     });
   } catch { /* email is best effort */ }

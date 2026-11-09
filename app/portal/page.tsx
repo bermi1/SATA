@@ -35,14 +35,13 @@ export default async function Dashboard() {
             <div className="mt-5 rounded-2xl border border-line bg-white p-5">
               <div className="font-display text-base font-bold text-deep">Certificate and ID card</div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <a href={`/api/certificate/${me.memberNo}?download=1`} className="rounded-full bg-blue px-4 py-2 text-xs font-bold text-white hover:bg-deep">Download certificate</a>
+                <a href={`/api/certificate/${me.memberNo}?download=1`} className="rounded-full bg-blue px-4 py-2 text-xs font-bold text-white hover:bg-deep">Download certificate (PDF)</a>
                 <a href={`/api/card/${me.memberNo}?download=1`} className="rounded-full border border-blue px-4 py-2 text-xs font-bold text-blue hover:bg-mist">Download ID card</a>
               </div>
               <details className="mt-3 text-xs">
                 <summary className="cursor-pointer font-semibold text-blue">Preview</summary>
                 <div className="mt-3 space-y-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/api/certificate/${me.memberNo}`} alt="Membership certificate" loading="lazy" className="w-full rounded-lg border border-line" />
+                  <a href={`/api/certificate/${me.memberNo}`} target="_blank" rel="noreferrer" className="inline-flex font-semibold text-blue underline">Open the certificate PDF in a new tab</a>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={`/api/card/${me.memberNo}`} alt="Digital ID card" loading="lazy" className="w-full max-w-sm rounded-xl border border-line" />
                 </div>
